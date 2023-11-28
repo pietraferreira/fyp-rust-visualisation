@@ -6,9 +6,9 @@ Welcome to the README for the Final Year Project, an ambitious endeavor to simpl
 
 To dive into this project, follow these steps:
 
-1. **Clone the Repository:**
+1. **Clone the Repository (using SSH):**
    ```bash
-   git clone https://github.com/pietraferreira/fyp-rust-visualisation.git
+   git clone git@github.com/pietraferreira/fyp-rust-visualisation.git
    cd fyp-rust-visualisation
    ```
 
