@@ -36,6 +36,5 @@ let x: i32 = 42;
 (source_file 
   (variable_declaration 
     (identifier)
-    (type_expression
-      (identifier))
+    (type_expression)
     (literal)))
