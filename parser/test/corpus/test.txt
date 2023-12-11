@@ -7,7 +7,7 @@ let x = 42;
 --------------------------------------------------------------------------------
 
 (source_file
-  (variable_declaration 
+  (let_declaration 
     (identifier)
     (literal)))
 
@@ -20,7 +20,7 @@ let mut y = 10;
 --------------------------------------------------------------------------------
 
 (source_file 
-  (variable_declaration 
+  (let_declaration 
     (mutable_specifier)
     (identifier)
     (literal)))
@@ -34,7 +34,7 @@ let x: i32 = 42;
 --------------------------------------------------------------------------------
 
 (source_file 
-  (variable_declaration 
+  (let_declaration 
     (identifier)
     (type_expression)
     (literal)))
