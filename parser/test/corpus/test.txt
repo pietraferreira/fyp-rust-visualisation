@@ -24,3 +24,18 @@ let mut y = 10;
     (mutable_specifier)
     (identifier)
     (literal)))
+
+================================================================================
+Simple declaration (with type annotation)
+================================================================================
+
+let x: i32 = 42;
+
+--------------------------------------------------------------------------------
+
+(source_file 
+  (variable_declaration 
+    (identifier)
+    (type_expression
+      (identifier))
+    (literal)))
