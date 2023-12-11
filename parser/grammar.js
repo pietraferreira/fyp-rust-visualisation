@@ -16,7 +16,8 @@ module.exports = grammar ({
 
     // simple statement rule (variable declaration)
     _statement: $ => choice(
-      $.variable_declaration,
+      $.let_declaration,
+      $.empty_statement
     ),
 
     // simple expression rule
@@ -41,7 +42,7 @@ module.exports = grammar ({
     mutable_specifier: $ => 'mut',
 
     // variable declaration rule
-    variable_declaration: $ => seq(
+    let_declaration: $ => seq(
       'let',
       optional($.mutable_specifier),
       $._pattern,
@@ -92,6 +93,8 @@ module.exports = grammar ({
       ),
       '}'
     ),
+
+    empty_statement: $ => ';'
   }
 });
 

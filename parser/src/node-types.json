@@ -8,6 +8,10 @@
       "required": false,
       "types": [
         {
+          "type": "empty_statement",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
@@ -21,6 +25,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "empty_statement",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "mut_pattern",
@@ -72,6 +81,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "empty_statement",
+          "named": true
+        },
         {
           "type": "shebang",
           "named": true
