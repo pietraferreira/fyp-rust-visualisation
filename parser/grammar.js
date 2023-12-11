@@ -40,6 +40,10 @@ module.exports = grammar ({
       optional($.mutable_specifier),
       $._pattern,
       optional(seq(
+        ':',
+        $.type_expression,
+      )),
+      optional(seq(
         '=',
         $._expression,
       )),
@@ -51,5 +55,8 @@ module.exports = grammar ({
       $._pattern,
     )),
 
+    type_expression: $ => choice(
+      $.identifier
+    )
   }
 });
