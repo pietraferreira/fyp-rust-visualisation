@@ -16,14 +16,41 @@ module.exports = grammar ({
 
     // simple statement rule (variable declaration)
     _statement: $ => choice(
-      $.let_declaration,
+      $._declaration_statement,
+      $._expression_statement,
       $.empty_statement
+    ),
+
+    _declaration_statement: $ => choice(
+      $._item,
+      $.let_declaration
+    ),
+
+    _item: $ => choice(
+      $.function_declaration
     ),
 
     // simple expression rule
     _expression: $ => choice(
-      $.identifier,
+      $.return_expression,
       $.literal,
+      $.identifier,
+      seq('(', $._expression, ')')
+    ),
+
+    return_expression: $ => prec.left(seq(
+      'return', optional($._expression))
+    ),
+
+    call_expression: $ => seq(
+      $._expression,
+      $.arguments
+    ),
+
+    arguments: $ => seq(
+      '(',
+      commaSep($._expression),
+      ')'
     ),
 
     _pattern: $ => choice(
@@ -32,7 +59,7 @@ module.exports = grammar ({
     ),
 
     // identifier rule
-    identifier: $ => /[a-zA-Z_]\w*/,
+    identifier: $ => (/[\a_$][\a\d_$]*/),
 
     // literal rule (only integers for now)
     literal: $ => /\d+/,
@@ -57,14 +84,23 @@ module.exports = grammar ({
       ';',
     ),
 
+    //function_declaration: $ => seq(
+    //  'fn',
+    //  $.identifier,
+    //  $.parameters,
+    //  optional(seq(
+    //    '->',
+    //    $.type_expression),
+    //  ),
+    //  '!',
+    //  $.block
+    //),
+
     function_declaration: $ => seq(
       'fn',
       $.identifier,
       $.parameters,
-      optional(seq(
-        '->',
-        $.type_expression),
-      ),
+      optional(seq('->', $.type_expression)),
       '!',
       $.block
     ),
@@ -77,6 +113,11 @@ module.exports = grammar ({
     type_expression: $ => choice(
       integer_type,
       $.identifier
+    ),
+
+    _expression_statement: $ => seq(
+      $._expression,
+      ';'
     ),
 
     parameters: $ => seq(
