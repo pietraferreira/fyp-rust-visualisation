@@ -16,11 +16,11 @@
           "named": true
         },
         {
-          "type": "literal",
+          "type": "let_declaration",
           "named": true
         },
         {
-          "type": "variable_declaration",
+          "type": "literal",
           "named": true
         }
       ]
@@ -30,6 +30,37 @@
     "type": "empty_statement",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "let_declaration",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "literal",
+          "named": true
+        },
+        {
+          "type": "mut_pattern",
+          "named": true
+        },
+        {
+          "type": "mutable_specifier",
+          "named": true
+        },
+        {
+          "type": "type_expression",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "mut_pattern",
@@ -86,11 +117,11 @@
           "named": true
         },
         {
-          "type": "shebang",
+          "type": "let_declaration",
           "named": true
         },
         {
-          "type": "variable_declaration",
+          "type": "shebang",
           "named": true
         }
       ]
@@ -106,37 +137,6 @@
       "types": [
         {
           "type": "identifier",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "variable_declaration",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "literal",
-          "named": true
-        },
-        {
-          "type": "mut_pattern",
-          "named": true
-        },
-        {
-          "type": "mutable_specifier",
-          "named": true
-        },
-        {
-          "type": "type_expression",
           "named": true
         }
       ]

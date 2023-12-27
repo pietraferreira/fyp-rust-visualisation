@@ -1,5 +1,5 @@
 {
-  "name": "rust",
+  "name": "rustfyp",
   "rules": {
     "source_file": {
       "type": "SEQ",
@@ -77,7 +77,7 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "variable_declaration"
+          "name": "let_declaration"
         },
         {
           "type": "SYMBOL",
@@ -127,7 +127,7 @@
       "type": "STRING",
       "value": "mut"
     },
-    "variable_declaration": {
+    "let_declaration": {
       "type": "SEQ",
       "members": [
         {

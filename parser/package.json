@@ -15,5 +15,11 @@
   },
   "scripts": {
     "test": "tree-sitter test"
-  }
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.rustfyp",
+      "file-types": ["rs"]
+    }
+  ]
 }
