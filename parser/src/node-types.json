@@ -49,10 +49,6 @@
         {
           "type": "literal",
           "named": true
-        },
-        {
-          "type": "return_expression",
-          "named": true
         }
       ]
     }
@@ -61,33 +57,6 @@
     "type": "empty_statement",
     "named": true,
     "fields": {}
-  },
-  {
-    "type": "function_declaration",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "block",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "parameters",
-          "named": true
-        },
-        {
-          "type": "type_expression",
-          "named": true
-        }
-      ]
-    }
   },
   {
     "type": "let_declaration",
@@ -111,10 +80,6 @@
         },
         {
           "type": "mutable_specifier",
-          "named": true
-        },
-        {
-          "type": "return_expression",
           "named": true
         },
         {
@@ -202,23 +167,7 @@
           "named": true
         },
         {
-          "type": "function_declaration",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
           "type": "let_declaration",
-          "named": true
-        },
-        {
-          "type": "literal",
-          "named": true
-        },
-        {
-          "type": "return_expression",
           "named": true
         },
         {
