@@ -47,9 +47,23 @@ module.exports = grammar ({
     // identifier rule
     identifier: $ => (/[\a_$][\a\d_$]*/),
 
+    _integer_literal: $ => token(seq(
+      choice(
+        // decimal
+        /[0-9][0-9_]*/,
+        // hex
+        /0x[0-9a-fA-F_]+/,
+        // oct
+        /0o[0-7_]+/,
+        // binary
+        /0b[01_]+/,
+      ),
+      optional(integer_type),
+    )),
+
     // literal rule (only integers for now)
     literal: $ => choice(
-      /\d+/, // integer literals
+      $._integer_literal, // integer literals
       /"[^"]*"/, // string literals
     ),
 
