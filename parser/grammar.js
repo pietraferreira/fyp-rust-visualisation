@@ -35,22 +35,10 @@ module.exports = grammar ({
       $.return_expression,
       $.literal,
       $.identifier,
-      seq('(', $._expression, ')')
-    ),
-
-    return_expression: $ => prec.left(seq(
-      'return', optional($._expression))
-    ),
-
-    call_expression: $ => seq(
-      $._expression,
-      $.arguments
-    ),
-
-    arguments: $ => seq(
-      '(',
-      commaSep($._expression),
-      ')'
+      $.literal,
+      $.method_call,
+      $.macro_invocation,
+      $.reference_expression
     ),
 
     _pattern: $ => choice(
@@ -62,7 +50,10 @@ module.exports = grammar ({
     identifier: $ => (/[\a_$][\a\d_$]*/),
 
     // literal rule (only integers for now)
-    literal: $ => /\d+/,
+    literal: $ => choice(
+      /\d+/, // integer literals
+      /"[^"]*"/, // string literals
+    ),
 
     shebang: _ => /#![\s]*[^\[\s]+/,
 
@@ -135,7 +126,36 @@ module.exports = grammar ({
       '}'
     ),
 
-    empty_statement: $ => ';'
+    empty_statement: $ => ';',
+
+    method_call: $ => seq(
+      $.identifier,
+      '.',
+      $.identifier,
+      '(',
+      optional($.expression_list),
+      ')'
+    ),
+
+    macro_invocation: $ => seq(
+      $.identifier,
+      '!',
+      $.macro_arguments
+    ),
+
+    macro_arguments: $ => seq(
+      '(',
+      optional($.expression_list),
+      ')'
+    ),
+
+    expression_list: $ => commaSep1($._expression),
+
+    reference_expression: $ => seq(
+      '&',
+      optional($.mutable_specifier),
+      $._expression
+    ),
   }
 });
 
