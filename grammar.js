@@ -16,24 +16,13 @@ module.exports = grammar ({
 
     // simple statement rule (variable declaration)
     _statement: $ => choice(
-      $._declaration_statement,
-      $._expression_statement,
-      $.empty_statement
-    ),
-
-    _declaration_statement: $ => choice(
-      $._item,
-      $.let_declaration
-    ),
-
-    _item: $ => choice(
+      $.let_declaration,
+      $.empty_statement,
       $.function_declaration
     ),
 
     // simple expression rule
     _expression: $ => choice(
-      $.return_expression,
-      $.literal,
       $.identifier,
       $.literal,
       $.method_call,
@@ -47,7 +36,7 @@ module.exports = grammar ({
     ),
 
     // identifier rule
-    identifier: $ => (/[\a_$][\a\d_$]*/),
+    identifier: $ => /[a-zA-Z_]\w*/,
 
     _integer_literal: $ => token(seq(
       choice(
@@ -89,24 +78,14 @@ module.exports = grammar ({
       ';',
     ),
 
-    //function_declaration: $ => seq(
-    //  'fn',
-    //  $.identifier,
-    //  $.parameters,
-    //  optional(seq(
-    //    '->',
-    //    $.type_expression),
-    //  ),
-    //  '!',
-    //  $.block
-    //),
-
     function_declaration: $ => seq(
       'fn',
       $.identifier,
       $.parameters,
-      optional(seq('->', $.type_expression)),
-      '!',
+      optional(seq(
+        '->',
+        $.type_expression),
+      ),
       $.block
     ),
 
@@ -120,23 +99,20 @@ module.exports = grammar ({
       $.identifier
     ),
 
-    _expression_statement: $ => seq(
-      $._expression,
-      ';'
-    ),
-
     parameters: $ => seq(
       '(',
-      commaSep(seq($.identifier, ':', $.type_expression)),
+      commaSep($.parameter),
       ')'
+    ),
+
+    parameter: $ => seq(
+      $.identifier,
+      optional(seq(':', $.type_expression))
     ),
 
     block: $ => seq(
       '{',
-      choice(
-        optional($._statement_list),
-        optional($._expression)
-      ),
+      repeat($._statement),
       '}'
     ),
 
