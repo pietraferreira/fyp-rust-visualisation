@@ -16,9 +16,9 @@ module.exports = grammar ({
 
     // simple statement rule (variable declaration)
     _statement: $ => choice(
-      $._declaration_statement,
-      $._expression_statement,
-      $.empty_statement
+      $.let_declaration,
+      $.empty_statement,
+      $.function_declaration
     ),
 
     _declaration_statement: $ => choice(
@@ -103,8 +103,10 @@ module.exports = grammar ({
       'fn',
       $.identifier,
       $.parameters,
-      optional(seq('->', $.type_expression)),
-      '!',
+      optional(seq(
+        '->',
+        $.type_expression),
+      ),
       $.block
     ),
 
@@ -125,16 +127,18 @@ module.exports = grammar ({
 
     parameters: $ => seq(
       '(',
-      commaSep(seq($.identifier, ':', $.type_expression)),
+      commaSep($.parameter),
       ')'
+    ),
+
+    parameter: $ => seq(
+      $.identifier,
+      optional(seq(':', $.type_expression))
     ),
 
     block: $ => seq(
       '{',
-      choice(
-        optional($._statement_list),
-        optional($._expression)
-      ),
+      repeat($._statement),
       '}'
     ),
 
