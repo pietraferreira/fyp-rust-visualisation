@@ -18,7 +18,8 @@ module.exports = grammar ({
     _statement: $ => choice(
       $.let_declaration,
       $.empty_statement,
-      $.function_declaration
+      $.function_declaration,
+      $.expression_statement
     ),
 
     // simple expression rule
@@ -27,7 +28,12 @@ module.exports = grammar ({
       $.literal,
       $.method_call,
       $.macro_invocation,
-      $.reference_expression
+      $.reference_expression,
+    ),
+
+    expression_statement: $ => seq(
+      $._expression,
+      ';'
     ),
 
     _pattern: $ => choice(
@@ -87,6 +93,15 @@ module.exports = grammar ({
         $.type_expression),
       ),
       $.block
+    ),
+
+    method_call: $ => seq(
+      field('object', $._expression), // object of method call
+      '.',
+      field('method', $.identifier), // method name
+      '(',
+      optional($.expression_list), // method args 
+      ')'
     ),
 
     mut_pattern: $ => prec(-1, seq(
