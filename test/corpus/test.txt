@@ -57,14 +57,15 @@ fn my_function() {}
 Method call 
 ================================================================================
 
-object.method()
+object.method();
 
 --------------------------------------------------------------------------------
 
 (source_file
-  (method_call
-    (identifier)
-    (identifier)))
+  (expression_statement
+    (method_call
+      (identifier)
+      (identifier))))
 
 ================================================================================
 Macro invocation 
