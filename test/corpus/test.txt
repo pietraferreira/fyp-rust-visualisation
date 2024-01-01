@@ -74,11 +74,12 @@ Macro invocation
 println!("Hello, World!");
 
 --------------------------------------------------------------------------------
-
 (source_file
-  (macro_invocation
-    (identifier)
-    (macro_arguments)))
+  (expression_statement
+    (macro_invocation
+      (identifier)
+      (macro_arguments
+        (literal)))))
 
 ================================================================================
 Reference expression 
