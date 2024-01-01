@@ -24,6 +24,9 @@ module.exports = grammar ({
     _expression: $ => choice(
       $.identifier,
       $.literal,
+      $.method_call,
+      $.macro_invocation,
+      $.reference_expression
     ),
 
     _pattern: $ => choice(
@@ -35,7 +38,10 @@ module.exports = grammar ({
     identifier: $ => /[a-zA-Z_]\w*/,
 
     // literal rule (only integers for now)
-    literal: $ => /\d+/,
+    literal: $ => choice(
+      /\d+/, // integer literals
+      /"[^"]*"/, // string literals
+    ),
 
     shebang: _ => /#![\s]*[^\[\s]+/,
 
@@ -94,7 +100,36 @@ module.exports = grammar ({
       '}'
     ),
 
-    empty_statement: $ => ';'
+    empty_statement: $ => ';',
+
+    method_call: $ => seq(
+      $.identifier,
+      '.',
+      $.identifier,
+      '(',
+      optional($.expression_list),
+      ')'
+    ),
+
+    macro_invocation: $ => seq(
+      $.identifier,
+      '!',
+      $.macro_arguments
+    ),
+
+    macro_arguments: $ => seq(
+      '(',
+      optional($.expression_list),
+      ')'
+    ),
+
+    expression_list: $ => commaSep1($._expression),
+
+    reference_expression: $ => seq(
+      '&',
+      optional($.mutable_specifier),
+      $._expression
+    ),
   }
 });
 
