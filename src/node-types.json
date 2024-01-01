@@ -200,7 +200,23 @@
       "required": false,
       "types": [
         {
-          "type": "expression_list",
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "literal",
+          "named": true
+        },
+        {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
+          "type": "method_call",
+          "named": true
+        },
+        {
+          "type": "reference_expression",
           "named": true
         }
       ]

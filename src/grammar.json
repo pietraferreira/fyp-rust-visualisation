@@ -636,7 +636,7 @@
           "members": [
             {
               "type": "SYMBOL",
-              "name": "expression_list"
+              "name": "_macro_argument_elements"
             },
             {
               "type": "BLANK"
@@ -648,6 +648,23 @@
           "value": ")"
         }
       ]
+    },
+    "_macro_argument_elements": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "literal"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_expression"
+          }
+        ]
+      }
     },
     "expression_list": {
       "type": "SEQ",
