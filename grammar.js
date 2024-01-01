@@ -150,9 +150,14 @@ module.exports = grammar ({
 
     macro_arguments: $ => seq(
       '(',
-      optional($.expression_list),
+      optional($._macro_argument_elements),
       ')'
     ),
+
+    _macro_argument_elements: $ => prec(1, choice(
+      $.literal,
+      $._expression
+    )),
 
     expression_list: $ => commaSep1($._expression),
 
