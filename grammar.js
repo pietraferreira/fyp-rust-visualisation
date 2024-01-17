@@ -19,7 +19,8 @@ module.exports = grammar ({
       $.let_declaration,
       $.empty_statement,
       $.function_declaration,
-      $.expression_statement
+      $.expression_statement,
+      $.block
     ),
 
     // simple expression rule
@@ -128,6 +129,7 @@ module.exports = grammar ({
     block: $ => seq(
       '{',
       repeat($._statement),
+      //optional(seq($._statement, ';')),
       '}'
     ),
 
