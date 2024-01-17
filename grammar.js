@@ -7,12 +7,8 @@ module.exports = grammar ({
   rules: {
     source_file: $ => seq(
       optional($.shebang),
-      repeat($._statement_list),
+      repeat($._statement),
     ),
-
-    _statement_list: $ => prec.left(sepTrailing(
-      choice('\n', ';'), $._statement_list, $._statement
-    )),
 
     // simple statement rule (variable declaration)
     _statement: $ => choice(
@@ -30,12 +26,26 @@ module.exports = grammar ({
       $.method_call,
       $.macro_invocation,
       $.reference_expression,
+      $.binary_expression
     ),
+
+   // expression_statement: $ => choice(
+   //   seq($._expression, ';'),
+   //   prec(-1, $._expression)
+   // ),
 
     expression_statement: $ => seq(
       $._expression,
       ';'
     ),
+
+    standalone_expression: $ => $._expression,
+
+    binary_expression: $ => prec.left(1, seq(
+      $._expression,
+      '+',
+      $._expression
+    )),
 
     _pattern: $ => choice(
       $.identifier,
@@ -91,8 +101,8 @@ module.exports = grammar ({
       $.parameters,
       optional(seq(
         '->',
-        $.type_expression),
-      ),
+        $.type_expression
+      )),
       $.block
     ),
 
@@ -129,6 +139,7 @@ module.exports = grammar ({
     block: $ => seq(
       '{',
       repeat($._statement),
+      optional($.standalone_expression),
       //optional(seq($._statement, ';')),
       '}'
     ),
