@@ -116,7 +116,7 @@ Block with multiple statements
 
 {
   let c = 30;
-  c
+  c;
 }
 
 --------------------------------------------------------------------------------
@@ -126,7 +126,8 @@ Block with multiple statements
     (let_declaration
       (identifier)
       (literal))
-    (identifier)))
+    (expression_statement
+    (identifier))))
 
 ================================================================================
 Function with parameters and return type
