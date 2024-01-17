@@ -141,12 +141,17 @@ fn calculate(x: i32, y: i32) -> i32 {
 
 (source_file
   (function_declaration
-    (identifier)
-    (parameters
-      (identifier)
-      (type_expression)
-      (identifier)
-      (type_expression))
-    (type_expression)
+    (identifier)                 
+    (parameters                  
+      (parameter
+        (identifier)             
+        (type_expression))       
+      (parameter
+        (identifier)             
+        (type_expression)))      
+    (type_expression)            
     (block
-      (binary_expression))))
+      (standalone_expression
+        (binary_expression
+          (identifier)           
+          (identifier))))))
