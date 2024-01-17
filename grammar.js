@@ -19,7 +19,8 @@ module.exports = grammar ({
       $.let_declaration,
       $.empty_statement,
       $.function_declaration,
-      $.expression_statement
+      $.expression_statement,
+      $.block
     ),
 
     _declaration_statement: $ => choice(
@@ -154,6 +155,7 @@ module.exports = grammar ({
     block: $ => seq(
       '{',
       repeat($._statement),
+      //optional(seq($._statement, ';')),
       '}'
     ),
 
