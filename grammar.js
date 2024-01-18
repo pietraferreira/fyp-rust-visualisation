@@ -23,11 +23,20 @@ module.exports = grammar ({
     _expression: $ => choice(
       $.identifier,
       $.literal,
+      $.assignment_expression,
       $.method_call,
       $.macro_invocation,
       $.reference_expression,
+      $.dereference_expression,
+      $.unary_expression,
       $.binary_expression
     ),
+
+    assignment_expression: $ => prec.right(1, seq(
+      $._expression,
+      '=',
+      $._expression
+    )),
 
    // expression_statement: $ => choice(
    //   seq($._expression, ';'),
@@ -41,9 +50,9 @@ module.exports = grammar ({
 
     standalone_expression: $ => $._expression,
 
-    binary_expression: $ => prec.left(1, seq(
+    binary_expression: $ => prec.left(2, seq(
       $._expression,
-      '+',
+      choice('+', '-', '*', '/'),
       $._expression
     )),
 
@@ -133,7 +142,17 @@ module.exports = grammar ({
 
     parameter: $ => seq(
       $.identifier,
-      optional(seq(':', $.type_expression))
+      ':',
+      choice(
+        $.reference_type,
+        $.type_expression
+      )
+    ),
+
+    reference_type: $ => seq(
+      '&',
+      optional($.mutable_specifier),
+      $.type_expression
     ),
 
     block: $ => seq(
@@ -174,11 +193,20 @@ module.exports = grammar ({
 
     expression_list: $ => commaSep1($._expression),
 
-    reference_expression: $ => seq(
+    reference_expression: $ => prec(3, seq(
       '&',
       optional($.mutable_specifier),
       $._expression
-    ),
+    )),
+
+    unary_expression: $ => prec(4, choice(
+      $.dereference_expression
+    )),
+
+    dereference_expression: $ => prec(4, seq(
+      '*',
+      $._expression
+    )),
   }
 });
 
