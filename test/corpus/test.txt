@@ -155,3 +155,38 @@ fn calculate(x: i32, y: i32) -> i32 {
         (binary_expression
           (identifier)           
           (identifier))))))
+
+================================================================================
+Parse Tree Representation of a Rust Function with Reference Parameters
+================================================================================
+
+fn process_data(data: &i32, buffer: &mut i32) {
+  *buffer = *data + 10;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file 
+  (function_declaration
+    (identifier)
+    (parameters 
+      (parameter 
+        (identifier)
+        (reference_type 
+          (type_expression)))
+      (parameter 
+        (identifier)
+        (reference_type 
+          (mutable_specifier)
+          (type_expression))))
+    (block 
+      (expression_statement
+        (assignment_expression 
+          (unary_expression
+            (dereference_expression 
+              (identifier)))
+          (binary_expression 
+            (unary_expression
+              (dereference_expression
+                (identifier)))
+            (literal)))))))
