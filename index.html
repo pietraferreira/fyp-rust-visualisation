@@ -12,6 +12,12 @@
             padding: 10px;
             font-family: monospace;
         }
+        .legend {
+            margin-top: 20px;
+        }
+        .legend span {
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
@@ -19,8 +25,15 @@
     <button id="parseButton">Parse</button>
     <div id="codeOutput"></div>
 
+    <!-- Legend for color coding -->
+    <div class="legend">
+        <h3>Legend:</h3>
+        <span style="background-color: lightblue;">Ownership Transfer</span>
+        <span style="background-color: lightgreen;">Immutable Borrow</span>
+        <span style="background-color: pink;">Mutable Borrow</span>
+    </div>
+
     <script src="tree-sitter.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
-
