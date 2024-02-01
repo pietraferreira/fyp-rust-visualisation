@@ -8,12 +8,20 @@ async function initTreeSitter() {
     return parser;
 }
 
-function traverseNode(node) {
-    let type = node.type;
-    let text = node.isNamed() ? node.text : null;
-    let children = node.children.map(traverseNode);
-
-    return { type, text, children };
+// Function to generate the highlighted HTML from the syntax tree
+function generateHighlightedHTML(node, sourceCode) {
+    if (node.type === 'reference_expression' || node.type === 'mutable_specifier') { // Simple example: Highlight references and mutable specifiers
+        const htmlBeforeNode = sourceCode.substring(0, node.startIndex);
+        const nodeHtml = `<span style="background-color: yellow;">${sourceCode.substring(node.startIndex, node.endIndex)}</span>`;
+        const htmlAfterNode = sourceCode.substring(node.endIndex);
+        return htmlBeforeNode + nodeHtml + htmlAfterNode;
+    } else {
+        let currentSourceCode = sourceCode;
+        node.children.forEach(child => {
+            currentSourceCode = generateHighlightedHTML(child, currentSourceCode);
+        });
+        return currentSourceCode;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -22,8 +30,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('parseButton').addEventListener('click', () => {
         const code = document.getElementById('codeInput').value;
         const tree = parser.parse(code);
-        const readableTree = traverseNode(tree.rootNode);
+        // Update the overlay with highlighted HTML
+        document.getElementById('codeOutput').innerHTML = generateHighlightedHTML(tree.rootNode, code);
+    });
 
-        document.getElementById('parseResult').textContent = JSON.stringify(readableTree, null, 2);
+    // Update overlay whenever the code input changes
+    document.getElementById('codeInput').addEventListener('input', function() {
+        document.getElementById('codeOutput').textContent = this.value;
     });
 });
