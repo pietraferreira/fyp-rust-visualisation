@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <meta charset="UTF-8">
-    <title>Tree-sitter Rust Grammar Test</title>
+    <title>Tree-sitter Rust Grammar - Ownership and Borrowing Visualiser</title>
     <style>
         #codeOutput {
             white-space: pre-wrap;
@@ -11,26 +13,41 @@
             border: 1px solid #ddd;
             padding: 10px;
             font-family: monospace;
+            min-height: 200px;
         }
         .legend {
             margin-top: 20px;
         }
         .legend span {
             padding: 5px;
+            width: auto;
         }
     </style>
 </head>
 <body>
-    <textarea id="codeInput" rows="10" cols="50" placeholder="Enter Rust code here"></textarea>
-    <button id="parseButton">Parse</button>
-    <div id="codeOutput"></div>
-
-    <!-- Legend for color coding -->
-    <div class="legend">
-        <h3>Legend:</h3>
-        <span style="background-color: lightblue;">Ownership Transfer</span>
-        <span style="background-color: lightgreen;">Immutable Borrow</span>
-        <span style="background-color: pink;">Mutable Borrow</span>
+  <div class="container mt-5">
+        <!-- Labels for color coding, moved to the top and renamed -->
+        <div class="row mb-3"> <!-- Margin bottom added for spacing -->
+            <div class="col-md-12">
+                <div class="legend">
+                    <h5>Labels:</h5> <!-- Renamed from Legend to Labels -->
+                    <span class="d-inline-block mr-3" style="background-color: lightblue; padding: 5px;">Ownership Transfer</span>
+                    <span class="d-inline-block mr-3" style="background-color: lightgreen; padding: 5px;">Immutable Borrow</span>
+                    <span class="d-inline-block" style="background-color: pink; padding: 5px;">Mutable Borrow</span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <textarea id="codeInput" class="form-control" rows="10" placeholder="Enter Rust code here"></textarea>
+                <button id="parseButton" class="btn btn-primary mt-3">Parse</button>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div id="codeOutput" class="border rounded p-3" style="background-color: #f8f9fa;"></div>
+            </div>
+        </div>
     </div>
 
     <script src="tree-sitter.js"></script>
