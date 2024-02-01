@@ -8,20 +8,37 @@ async function initTreeSitter() {
     return parser;
 }
 
-// Function to generate the highlighted HTML from the syntax tree
 function generateHighlightedHTML(node, sourceCode) {
-    if (node.type === 'reference_expression' || node.type === 'mutable_specifier') { // Simple example: Highlight references and mutable specifiers
-        const htmlBeforeNode = sourceCode.substring(0, node.startIndex);
-        const nodeHtml = `<span style="background-color: yellow;">${sourceCode.substring(node.startIndex, node.endIndex)}</span>`;
-        const htmlAfterNode = sourceCode.substring(node.endIndex);
-        return htmlBeforeNode + nodeHtml + htmlAfterNode;
-    } else {
-        let currentSourceCode = sourceCode;
-        node.children.forEach(child => {
-            currentSourceCode = generateHighlightedHTML(child, currentSourceCode);
-        });
-        return currentSourceCode;
+    // Define the start and end tags for highlighting
+    const highlightStartTag = `<span style="background-color: yellow;">`;
+    const highlightEndTag = `</span>`;
+
+    // Function to recursively traverse and highlight the syntax tree
+    function highlightNode(node) {
+        let result = '';
+        if (node.type === 'reference_expression' || node.type === 'mutable_specifier') {
+            // Directly highlight references and mutable specifiers
+            result += highlightStartTag + sourceCode.substring(node.startIndex, node.endIndex) + highlightEndTag;
+        } else if (node.type === 'assignment_expression' || node.type === 'let_declaration') {
+            // Highlight entire declarations and assignments for ownership transfer
+            result += highlightStartTag + sourceCode.substring(node.startIndex, node.endIndex) + highlightEndTag;
+        } else {
+            // For other types, recurse on children
+            let lastIndex = node.startIndex;
+            node.children.forEach((child) => {
+                // Add unhighlighted text
+                result += sourceCode.substring(lastIndex, child.startIndex);
+                // Recursively highlight child
+                result += highlightNode(child);
+                lastIndex = child.endIndex;
+            });
+            // Add any remaining unhighlighted text
+            result += sourceCode.substring(lastIndex, node.endIndex);
+        }
+        return result;
     }
+
+    return highlightNode(node);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -30,12 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('parseButton').addEventListener('click', () => {
         const code = document.getElementById('codeInput').value;
         const tree = parser.parse(code);
-        // Update the overlay with highlighted HTML
+        // Generate and display the highlighted HTML in the output area
         document.getElementById('codeOutput').innerHTML = generateHighlightedHTML(tree.rootNode, code);
     });
-
-    // Update overlay whenever the code input changes
-    document.getElementById('codeInput').addEventListener('input', function() {
-        document.getElementById('codeOutput').textContent = this.value;
-    });
 });
+
