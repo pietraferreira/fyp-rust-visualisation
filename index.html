@@ -3,13 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Tree-sitter Rust Grammar Test</title>
+    <style>
+        #codeOutput {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-family: monospace;
+        }
+    </style>
 </head>
 <body>
     <textarea id="codeInput" rows="10" cols="50" placeholder="Enter Rust code here"></textarea>
     <button id="parseButton">Parse</button>
-    <pre id="parseResult"></pre>
+    <div id="codeOutput"></div>
 
     <script src="tree-sitter.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
+
