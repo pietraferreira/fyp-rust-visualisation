@@ -9,43 +9,40 @@ async function initTreeSitter() {
 }
 
 function generateHighlightedHTML(node, sourceCode) {
-    // Define different styles for ownership, immutable borrow, and mutable borrow
-    const ownershipStyle = `style="background-color: lightblue;"`; // Ownership
-    const immutableBorrowStyle = `style="background-color: lightgreen;"`; // Immutable borrow
-    const mutableBorrowStyle = `style="background-color: pink;"`; // Mutable borrow
+    // Define styles
+    const ownershipStyle = `style="background-color: lightblue;"`;
+    const immutableBorrowStyle = `style="background-color: lightgreen;"`;
+    const mutableBorrowStyle = `style="background-color: pink;"`;
 
-    // Helper function to apply the appropriate style
     function applyStyle(nodeType, text) {
-        switch (nodeType) {
-            case 'assignment_expression':
-            case 'let_declaration': // Simplified assumption for ownership transfer
-                return `<span ${ownershipStyle}>${text}</span>`;
-            case 'reference_expression': // Assuming this indicates an immutable borrow
-                return `<span ${immutableBorrowStyle}>${text}</span>`;
-            case 'mutable_specifier': // Part of a mutable borrow expression
-                return `<span ${mutableBorrowStyle}>${text}</span>`;
-            default:
-                return text; // No specific styling
+        if (nodeType === 'mutable_specifier') {
+            // Check the context to see if this is part of a reference expression
+            return `<span ${mutableBorrowStyle}>${text}</span>`;
+        } else if (nodeType === 'reference_expression') {
+            // Determine if the reference is mutable or immutable by inspecting the text or additional node information
+            const isMutable = text.includes("&mut");
+            const style = isMutable ? mutableBorrowStyle : immutableBorrowStyle;
+            return `<span ${style}>${text}</span>`;
+        } else if (nodeType === 'assignment_expression' || nodeType === 'let_declaration') {
+            return `<span ${ownershipStyle}>${text}</span>`;
         }
+        // Default to no specific styling
+        return text;
     }
 
-    // Recursive function to traverse and highlight the syntax tree
     function highlightNode(node) {
         let result = '';
-        if (node.type === 'reference_expression' || node.type === 'mutable_specifier' || node.type === 'assignment_expression' || node.type === 'let_declaration') {
+        if (['reference_expression', 'mutable_specifier', 'assignment_expression', 'let_declaration'].includes(node.type)) {
             // Apply specific styling based on the node type
             result += applyStyle(node.type, sourceCode.substring(node.startIndex, node.endIndex));
         } else {
             // For other node types, process their children
             let lastIndex = node.startIndex;
             node.children.forEach((child) => {
-                // Add unhighlighted text between nodes
                 result += sourceCode.substring(lastIndex, child.startIndex);
-                // Recursively highlight child nodes
                 result += highlightNode(child);
                 lastIndex = child.endIndex;
             });
-            // Add any remaining unhighlighted text after the last child
             result += sourceCode.substring(lastIndex, node.endIndex);
         }
         return result;
