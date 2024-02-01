@@ -9,30 +9,43 @@ async function initTreeSitter() {
 }
 
 function generateHighlightedHTML(node, sourceCode) {
-    // Define the start and end tags for highlighting
-    const highlightStartTag = `<span style="background-color: yellow;">`;
-    const highlightEndTag = `</span>`;
+    // Define different styles for ownership, immutable borrow, and mutable borrow
+    const ownershipStyle = `style="background-color: lightblue;"`; // Ownership
+    const immutableBorrowStyle = `style="background-color: lightgreen;"`; // Immutable borrow
+    const mutableBorrowStyle = `style="background-color: pink;"`; // Mutable borrow
 
-    // Function to recursively traverse and highlight the syntax tree
+    // Helper function to apply the appropriate style
+    function applyStyle(nodeType, text) {
+        switch (nodeType) {
+            case 'assignment_expression':
+            case 'let_declaration': // Simplified assumption for ownership transfer
+                return `<span ${ownershipStyle}>${text}</span>`;
+            case 'reference_expression': // Assuming this indicates an immutable borrow
+                return `<span ${immutableBorrowStyle}>${text}</span>`;
+            case 'mutable_specifier': // Part of a mutable borrow expression
+                return `<span ${mutableBorrowStyle}>${text}</span>`;
+            default:
+                return text; // No specific styling
+        }
+    }
+
+    // Recursive function to traverse and highlight the syntax tree
     function highlightNode(node) {
         let result = '';
-        if (node.type === 'reference_expression' || node.type === 'mutable_specifier') {
-            // Directly highlight references and mutable specifiers
-            result += highlightStartTag + sourceCode.substring(node.startIndex, node.endIndex) + highlightEndTag;
-        } else if (node.type === 'assignment_expression' || node.type === 'let_declaration') {
-            // Highlight entire declarations and assignments for ownership transfer
-            result += highlightStartTag + sourceCode.substring(node.startIndex, node.endIndex) + highlightEndTag;
+        if (node.type === 'reference_expression' || node.type === 'mutable_specifier' || node.type === 'assignment_expression' || node.type === 'let_declaration') {
+            // Apply specific styling based on the node type
+            result += applyStyle(node.type, sourceCode.substring(node.startIndex, node.endIndex));
         } else {
-            // For other types, recurse on children
+            // For other node types, process their children
             let lastIndex = node.startIndex;
             node.children.forEach((child) => {
-                // Add unhighlighted text
+                // Add unhighlighted text between nodes
                 result += sourceCode.substring(lastIndex, child.startIndex);
-                // Recursively highlight child
+                // Recursively highlight child nodes
                 result += highlightNode(child);
                 lastIndex = child.endIndex;
             });
-            // Add any remaining unhighlighted text
+            // Add any remaining unhighlighted text after the last child
             result += sourceCode.substring(lastIndex, node.endIndex);
         }
         return result;
@@ -47,8 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('parseButton').addEventListener('click', () => {
         const code = document.getElementById('codeInput').value;
         const tree = parser.parse(code);
-        // Generate and display the highlighted HTML in the output area
+        // Update the codeOutput with highlighted HTML based on the syntax tree
         document.getElementById('codeOutput').innerHTML = generateHighlightedHTML(tree.rootNode, code);
     });
 });
-
