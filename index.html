@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- bootstrap CSS -->
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <meta charset="UTF-8">
-    <title>Tree-sitter Rust Grammar - Ownership and Borrowing Visualiser</title>
+    <title>Tree-sitter Rust Grammar - Ownership and Borrowing Visualizer</title>
     <style>
         #codeOutput {
             white-space: pre-wrap;
@@ -22,15 +22,22 @@
             padding: 5px;
             width: auto;
         }
+        #detailedAnalysis {
+            display: none; /* Initially hidden */
+            background-color: #ffffe0; /* Light yellow background for visibility */
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 20px; /* Space above the analysis section */
+        }
     </style>
 </head>
 <body>
-  <div class="container mt-5">
-        <!-- Labels for color coding, moved to the top and renamed -->
-        <div class="row mb-3"> <!-- Margin bottom added for spacing -->
+    <div class="container mt-5">
+        <!-- Labels for color coding -->
+        <div class="row mb-3">
             <div class="col-md-12">
                 <div class="legend">
-                    <h5>Labels:</h5> <!-- Renamed from Legend to Labels -->
+                    <h5>Labels:</h5>
                     <span class="d-inline-block mr-3" style="background-color: lightblue; padding: 5px;">Ownership Transfer</span>
                     <span class="d-inline-block mr-3" style="background-color: lightgreen; padding: 5px;">Immutable Borrow</span>
                     <span class="d-inline-block" style="background-color: pink; padding: 5px;">Mutable Borrow</span>
@@ -46,6 +53,15 @@
         <div class="row mt-3">
             <div class="col-md-12">
                 <div id="codeOutput" class="border rounded p-3" style="background-color: #f8f9fa;"></div>
+            </div>
+        </div>
+        <!-- Detailed Analysis Section -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div id="detailedAnalysis" class="border rounded p-3">
+                    <h5>Detailed Analysis</h5>
+                    <p id="analysisText">Hover over the highlighted sections in the code output for detailed analysis.</p>
+                </div>
             </div>
         </div>
     </div>

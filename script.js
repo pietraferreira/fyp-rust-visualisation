@@ -9,34 +9,36 @@ async function initTreeSitter() {
 }
 
 function generateHighlightedHTML(node, sourceCode) {
-    // Define styles
-    const ownershipStyle = `style="background-color: lightblue;"`;
-    const immutableBorrowStyle = `style="background-color: lightgreen;"`;
-    const mutableBorrowStyle = `style="background-color: pink;"`;
+    // Define styles with data-analysis for detailed explanations
+    const styleTemplate = (color, analysis) => `style="background-color: ${color};" data-analysis="${analysis}"`;
+
+    // Updated explanations to be more accurate
+    const ownershipStyle = styleTemplate("lightblue", "This is where ownership is established or transferred.");
+    const immutableBorrowStyle = styleTemplate("lightgreen", "An immutable borrow allows read-only access to the data.");
+    const mutableBorrowStyle = styleTemplate("pink", "A mutable borrow allows data to be modified.");
 
     function applyStyle(nodeType, text) {
-        if (nodeType === 'mutable_specifier') {
-            // Check the context to see if this is part of a reference expression
-            return `<span ${mutableBorrowStyle}>${text}</span>`;
-        } else if (nodeType === 'reference_expression') {
-            // Determine if the reference is mutable or immutable by inspecting the text or additional node information
-            const isMutable = text.includes("&mut");
-            const style = isMutable ? mutableBorrowStyle : immutableBorrowStyle;
-            return `<span ${style}>${text}</span>`;
-        } else if (nodeType === 'assignment_expression' || nodeType === 'let_declaration') {
-            return `<span ${ownershipStyle}>${text}</span>`;
+        let style = "";
+        // Refine conditions to more accurately apply styles
+        if (nodeType.includes('mutable_specifier') && text.includes("&mut")) {
+            style = mutableBorrowStyle; // Correct for mutable borrows
+        } else if (nodeType.includes('reference_expression') && !text.includes("&mut")) {
+            style = immutableBorrowStyle; // Correct for immutable borrows
+        } else {
+            // Apply a default style or no style
+            // Determine if there's a need for a default style based on your application's requirements
+            return text;
         }
-        // Default to no specific styling
-        return text;
+        return `<span ${style}>${text}</span>`;
     }
 
+    // Recursive function to traverse and highlight the syntax tree
     function highlightNode(node) {
         let result = '';
-        if (['reference_expression', 'mutable_specifier', 'assignment_expression', 'let_declaration'].includes(node.type)) {
-            // Apply specific styling based on the node type
+        // List of node types to check might need adjustment based on your tree-sitter grammar definitions
+        if (node.type === 'reference_expression' || node.type === 'mutable_specifier') {
             result += applyStyle(node.type, sourceCode.substring(node.startIndex, node.endIndex));
         } else {
-            // For other node types, process their children
             let lastIndex = node.startIndex;
             node.children.forEach((child) => {
                 result += sourceCode.substring(lastIndex, child.startIndex);
@@ -57,7 +59,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('parseButton').addEventListener('click', () => {
         const code = document.getElementById('codeInput').value;
         const tree = parser.parse(code);
-        // Update the codeOutput with highlighted HTML based on the syntax tree
         document.getElementById('codeOutput').innerHTML = generateHighlightedHTML(tree.rootNode, code);
+
+        // Attach event listeners for newly created spans for hover analysis
+        document.querySelectorAll('#codeOutput span').forEach(span => {
+            span.addEventListener('mouseover', (event) => {
+                const analysisText = event.target.getAttribute('data-analysis');
+                document.getElementById('detailedAnalysis').style.display = 'block';
+                document.getElementById('analysisText').textContent = analysisText;
+            });
+            span.addEventListener('mouseout', () => {
+                document.getElementById('detailedAnalysis').style.display = 'none';
+                document.getElementById('analysisText').textContent = '';
+            });
+        });
     });
 });
