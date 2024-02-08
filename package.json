@@ -11,6 +11,7 @@
     "nan": "^2.12.1"
   },
   "devDependencies": {
+    "axios": "^1.6.7",
     "tree-sitter-cli": "^0.20.8"
   },
   "scripts": {
@@ -19,7 +20,9 @@
   "tree-sitter": [
     {
       "scope": "source.rustfyp",
-      "file-types": ["rs"]
+      "file-types": [
+        "rs"
+      ]
     }
   ]
 }
