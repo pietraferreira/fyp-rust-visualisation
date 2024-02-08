@@ -1,43 +1,85 @@
 async function initTreeSitter() {
     await TreeSitter.init();
+    console.log('TreeSitter initialized');
 
     const parser = new TreeSitter();
     const RustFYP = await TreeSitter.Language.load('tree-sitter-rustfyp.wasm');
     parser.setLanguage(RustFYP);
+    console.log('Language set:', RustFYP);
 
     return parser;
+}
+
+function isMutableReference(node) {
+    // base case
+    if (node.type === 'mutable_specifier') {
+        return true;
+    }
+    
+    // if the node has children, iterate to find mutability
+    if (node.children.length > 0) {
+        for (let i = 0; i < node.children.length; i++) {
+            if (isMutableReference(node.children[i])) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+function involvesOwnershipTransfer(node, sourceCode) {
+    let transferDetected = false;
+
+    // Check for direct assignment expressions that likely involve ownership transfer
+    if (node.type === 'let_declaration' && node.children) {
+        // Get the right-hand side of the assignment
+        const rhs = node.children[1]; // Assuming index 1 is the RHS in your tree structure
+
+        // Check if the RHS is an identifier, which could imply a direct variable assignment and potential ownership transfer
+        if (rhs && rhs.type === 'identifier') {
+            // Check that the assignment is not a borrow. This is tricky without a full analysis,
+            // but assuming no explicit borrowing on RHS implies ownership transfer
+            const rhsText = sourceCode.substring(rhs.startIndex, rhs.endIndex);
+            if (!rhsText.startsWith('&')) { // Naive check for absence of borrowing
+                transferDetected = true;
+            }
+        }
+    }
+    return transferDetected;
 }
 
 function generateHighlightedHTML(node, sourceCode) {
     // Define styles with data-analysis for detailed explanations
     const styleTemplate = (color, analysis) => `style="background-color: ${color};" data-analysis="${analysis}"`;
 
-    // Updated explanations to be more accurate
-    const ownershipStyle = styleTemplate("lightblue", "This is where ownership is established or transferred.");
-    const immutableBorrowStyle = styleTemplate("lightgreen", "An immutable borrow allows read-only access to the data.");
-    const mutableBorrowStyle = styleTemplate("pink", "A mutable borrow allows data to be modified.");
+    // Explanation templates
+    const ownershipStyle = styleTemplate("lightblue", "Ownership is established or transferred.");
+    const immutableBorrowStyle = styleTemplate("lightgreen", "Immutable borrow, allowing read-only access.");
+    const mutableBorrowStyle = styleTemplate("pink", "Mutable borrow, allowing modification.");
 
-    function applyStyle(nodeType, text) {
+    function applyStyle(node, text, sourceCode) {
         let style = "";
-        // Refine conditions to more accurately apply styles
-        if (nodeType.includes('mutable_specifier') && text.includes("&mut")) {
-            style = mutableBorrowStyle; // Correct for mutable borrows
-        } else if (nodeType.includes('reference_expression') && !text.includes("&mut")) {
-            style = immutableBorrowStyle; // Correct for immutable borrows
-        } else {
-            // Apply a default style or no style
-            // Determine if there's a need for a default style based on your application's requirements
-            return text;
+    
+        // First, check for ownership transfer before mutable/immutable classification
+        const transfer = involvesOwnershipTransfer(node, sourceCode);
+        if (transfer) {
+            return `<span ${ownershipStyle}>${text}</span>`; // Directly return if ownership transfer is detected
         }
+    
+        // Then, check for mutable specifier presence for mutability.
+        style = immutableBorrowStyle; // Default to immutable borrow style.
+        if (node.type === 'let_declaration' && node.children.some(child => child.type === 'mutable_specifier')) {
+            style = mutableBorrowStyle; // If mutable specifier found, apply mutable borrow style.
+        }
+    
         return `<span ${style}>${text}</span>`;
     }
-
-    // Recursive function to traverse and highlight the syntax tree
     function highlightNode(node) {
         let result = '';
-        // List of node types to check might need adjustment based on your tree-sitter grammar definitions
-        if (node.type === 'reference_expression' || node.type === 'mutable_specifier') {
-            result += applyStyle(node.type, sourceCode.substring(node.startIndex, node.endIndex));
+        if (['let_declaration', 'reference_expression', 'assignment_expression'].includes(node.type)) {
+            const text = sourceCode.substring(node.startIndex, node.endIndex);
+            result += applyStyle(node, text, sourceCode);
         } else {
             let lastIndex = node.startIndex;
             node.children.forEach((child) => {
@@ -55,20 +97,26 @@ function generateHighlightedHTML(node, sourceCode) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const parser = await initTreeSitter();
+    console.log('DOM content loaded');
 
     document.getElementById('parseButton').addEventListener('click', () => {
         const code = document.getElementById('codeInput').value;
+        console.log('Code input:', code);
         const tree = parser.parse(code);
+        console.log('Syntax tree:', tree);
         document.getElementById('codeOutput').innerHTML = generateHighlightedHTML(tree.rootNode, code);
 
         // Attach event listeners for newly created spans for hover analysis
         document.querySelectorAll('#codeOutput span').forEach(span => {
             span.addEventListener('mouseover', (event) => {
                 const analysisText = event.target.getAttribute('data-analysis');
+                console.log('Hovered span:', event.target);
+                console.log('Analysis text:', analysisText);
                 document.getElementById('detailedAnalysis').style.display = 'block';
                 document.getElementById('analysisText').textContent = analysisText;
             });
             span.addEventListener('mouseout', () => {
+                console.log('Mouse out');
                 document.getElementById('detailedAnalysis').style.display = 'none';
                 document.getElementById('analysisText').textContent = '';
             });
