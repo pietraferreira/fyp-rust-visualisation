@@ -2,7 +2,7 @@ async function initTreeSitter() {
     await TreeSitter.init();
 
     const parser = new TreeSitter();
-    const RustFYP = await TreeSitter.Language.load('tree-sitter-rustfyp.wasm');
+    const RustFYP = await TreeSitter.Language.load("tree-sitter-rustfyp.wasm");
     parser.setLanguage(RustFYP);
 
     return parser;

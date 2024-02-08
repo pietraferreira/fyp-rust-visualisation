@@ -1,5 +1,99 @@
 [
   {
+    "type": "assignment_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "assignment_expression",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "dereference_expression",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "literal",
+          "named": true
+        },
+        {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
+          "type": "method_call",
+          "named": true
+        },
+        {
+          "type": "reference_expression",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "binary_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "assignment_expression",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "dereference_expression",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "literal",
+          "named": true
+        },
+        {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
+          "type": "method_call",
+          "named": true
+        },
+        {
+          "type": "reference_expression",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "block",
     "named": true,
     "fields": {},
@@ -7,6 +101,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "block",
+          "named": true
+        },
         {
           "type": "empty_statement",
           "named": true
@@ -21,6 +119,57 @@
         },
         {
           "type": "let_declaration",
+          "named": true
+        },
+        {
+          "type": "standalone_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "dereference_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "assignment_expression",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "dereference_expression",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "literal",
+          "named": true
+        },
+        {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
+          "type": "method_call",
+          "named": true
+        },
+        {
+          "type": "reference_expression",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
           "named": true
         }
       ]
@@ -40,6 +189,18 @@
       "required": true,
       "types": [
         {
+          "type": "assignment_expression",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "dereference_expression",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
@@ -57,6 +218,10 @@
         },
         {
           "type": "reference_expression",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
           "named": true
         }
       ]
@@ -71,6 +236,18 @@
       "required": true,
       "types": [
         {
+          "type": "assignment_expression",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "dereference_expression",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
@@ -88,6 +265,10 @@
         },
         {
           "type": "reference_expression",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
           "named": true
         }
       ]
@@ -129,6 +310,18 @@
       "required": true,
       "types": [
         {
+          "type": "assignment_expression",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "dereference_expression",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
@@ -159,6 +352,10 @@
         {
           "type": "type_expression",
           "named": true
+        },
+        {
+          "type": "unary_expression",
+          "named": true
         }
       ]
     }
@@ -177,6 +374,18 @@
       "required": false,
       "types": [
         {
+          "type": "assignment_expression",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "dereference_expression",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
@@ -194,6 +403,10 @@
         },
         {
           "type": "reference_expression",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
           "named": true
         }
       ]
@@ -273,6 +486,10 @@
           "named": true
         },
         {
+          "type": "reference_type",
+          "named": true
+        },
+        {
           "type": "type_expression",
           "named": true
         }
@@ -303,6 +520,18 @@
       "required": true,
       "types": [
         {
+          "type": "assignment_expression",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "dereference_expression",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
@@ -325,6 +554,29 @@
         {
           "type": "reference_expression",
           "named": true
+        },
+        {
+          "type": "unary_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "reference_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "mutable_specifier",
+          "named": true
+        },
+        {
+          "type": "type_expression",
+          "named": true
         }
       ]
     }
@@ -337,6 +589,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "block",
+          "named": true
+        },
         {
           "type": "empty_statement",
           "named": true
@@ -361,6 +617,53 @@
     }
   },
   {
+    "type": "standalone_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "assignment_expression",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "dereference_expression",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "literal",
+          "named": true
+        },
+        {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
+          "type": "method_call",
+          "named": true
+        },
+        {
+          "type": "reference_expression",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "type_expression",
     "named": true,
     "fields": {},
@@ -376,8 +679,19 @@
     }
   },
   {
-    "type": "\n",
-    "named": false
+    "type": "unary_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "dereference_expression",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "!",
@@ -396,7 +710,19 @@
     "named": false
   },
   {
+    "type": "*",
+    "named": false
+  },
+  {
+    "type": "+",
+    "named": false
+  },
+  {
     "type": ",",
+    "named": false
+  },
+  {
+    "type": "-",
     "named": false
   },
   {
@@ -405,6 +731,10 @@
   },
   {
     "type": ".",
+    "named": false
+  },
+  {
+    "type": "/",
     "named": false
   },
   {
