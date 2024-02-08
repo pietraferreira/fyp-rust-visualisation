@@ -2,6 +2,9 @@
 
 Welcome to the README for the Final Year Project, an ambitious endeavor to simplify the complexities of Rust's ownership and borrowing system through a cutting-edge visualization tool. As a Computer Science student at Brunel University London, I am excited to present this project, which aims to revolutionize the learning experience for Rust programmers of all levels.
 
+Checkout the application
+[here](https://pietraferreira.github.io/fyp-rust-visualisation/).
+
 ## Getting Started
 
 To dive into this project, follow these steps:
