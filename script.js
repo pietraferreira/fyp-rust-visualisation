@@ -29,23 +29,27 @@ function isMutableReference(node) {
 }
 
 function involvesOwnershipTransfer(node, sourceCode) {
+    // Initially assume no ownership transfer is detected
     let transferDetected = false;
 
-    // Check for direct assignment expressions that likely involve ownership transfer
-    if (node.type === 'let_declaration' && node.children) {
-        // Get the right-hand side of the assignment
-        const rhs = node.children[1]; // Assuming index 1 is the RHS in your tree structure
+    // Specifically target let_declaration nodes for potential ownership transfer
+    if (node.type === 'let_declaration') {
+        // Assuming the second child of a let_declaration is the RHS of the assignment
+        const rhs = node.children.length > 1 ? node.children[1] : null;
 
-        // Check if the RHS is an identifier, which could imply a direct variable assignment and potential ownership transfer
+        // Ownership transfer is more likely when RHS is an identifier that's not part of a new expression or literal
         if (rhs && rhs.type === 'identifier') {
-            // Check that the assignment is not a borrow. This is tricky without a full analysis,
-            // but assuming no explicit borrowing on RHS implies ownership transfer
+            // Further refine to exclude cases where RHS is a direct value assignment like a literal or a function call
             const rhsText = sourceCode.substring(rhs.startIndex, rhs.endIndex);
-            if (!rhsText.startsWith('&')) { // Naive check for absence of borrowing
+
+            // Exclude direct assignments (e.g., literals, new instances) by checking if RHS text is a simple identifier
+            if (!rhsText.match(/^\d+$/) && !rhsText.includes("::") && !rhsText.startsWith('&')) {
+                // This suggests RHS is a variable name, potentially indicating an ownership transfer
                 transferDetected = true;
             }
         }
     }
+
     return transferDetected;
 }
 
