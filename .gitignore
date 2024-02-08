@@ -128,3 +128,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+parser/target/debug/*
+parser/target/.rustc_info.json
