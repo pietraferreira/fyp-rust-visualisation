@@ -64,12 +64,15 @@ function generateHighlightedHTML(node, sourceCode) {
         // First, check for ownership transfer before mutable/immutable classification
         const transfer = involvesOwnershipTransfer(node, sourceCode);
         if (transfer) {
+            console.log('Ownership transfer detected!')
             return `<span ${ownershipStyle}>${text}</span>`; // Directly return if ownership transfer is detected
         }
     
         // Then, check for mutable specifier presence for mutability.
         style = immutableBorrowStyle; // Default to immutable borrow style.
+        console.log('Checking for mutability:', node.type, node.children)
         if (node.type === 'let_declaration' && node.children.some(child => child.type === 'mutable_specifier')) {
+            console.log('Mutable specifier found!')
             style = mutableBorrowStyle; // If mutable specifier found, apply mutable borrow style.
         }
     
@@ -77,8 +80,10 @@ function generateHighlightedHTML(node, sourceCode) {
     }
     function highlightNode(node) {
         let result = '';
+        //console.log(node.type, node.startIndex, node.endIndex)
         if (['let_declaration', 'reference_expression', 'assignment_expression'].includes(node.type)) {
             const text = sourceCode.substring(node.startIndex, node.endIndex);
+            console.log('we will highlight this:', text)
             result += applyStyle(node, text, sourceCode);
         } else {
             let lastIndex = node.startIndex;
@@ -103,7 +108,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const code = document.getElementById('codeInput').value;
         console.log('Code input:', code);
         const tree = parser.parse(code);
-        console.log('Syntax tree:', tree);
         document.getElementById('codeOutput').innerHTML = generateHighlightedHTML(tree.rootNode, code);
 
         // Attach event listeners for newly created spans for hover analysis
