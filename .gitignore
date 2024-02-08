@@ -131,3 +131,5 @@ dist
 
 parser/target/debug/*
 parser/target/.rustc_info.json
+.DS_Store
+src/.DS_Store
