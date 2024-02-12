@@ -10,69 +10,21 @@ async function initTreeSitter() {
     return parser;
 }
 
-function isMutableReference(node) {
-    // base case
-    if (node.type === 'mutable_specifier') {
-        return true;
-    }
-    
-    // if the node has children, iterate to find mutability
-    if (node.children.length > 0) {
-        for (let i = 0; i < node.children.length; i++) {
-            if (isMutableReference(node.children[i])) {
-                return true;
-            }
-        }
-    }
-    
-    return false;
-}
-
 function involvesOwnershipTransfer(node) {
-    // Initialize as false; we'll turn this true if we detect an actual ownership transfer
-    let transferDetected = false;
+    // Check if the node is a let_declaration
+    if (node.type === 'let_declaration') {
+        // Check for direct assignment that's not a borrowing
+        const hasDirectAssignment = node.children.some(child => 
+            child.type === 'identifier' || child.type === 'call_expression'); // Simplified for clarity
 
-    // Ownership transfer in Rust can be more complex than just assigning identifiers.
-    // We need to check for cases that are not simply mutable or immutable borrows.
-    if (node.type === 'let_declaration' && node.children.length > 1) {
-        const rhs = node.children.find(child => child.type === 'expression' || child.type === 'call_expression');
-        
-        // This checks for direct ownership transfers, like when using functions that return a value
-        // that isn't borrowed but owned (e.g., String::from())
-        if (rhs && (rhs.type === 'call_expression' || rhs.type === 'assignment_expression')) {
-            transferDetected = true;
-        }
+        const isBorrowing = node.children.some(child => 
+            child.type === 'reference_expression'); // Checks for any borrowing
 
-        // Additionally, check for cases where there is a direct assignment that doesn't involve borrowing
-        if (rhs && rhs.type === 'identifier' && !rhs.text.includes('&') && !rhs.text.includes('&mut ')) {
-            // This might be too simplistic as it assumes any identifier assignment is an ownership transfer,
-            // which might not always be the case. Further refinement could be necessary based on your needs.
-            transferDetected = true;
-        }
+        return hasDirectAssignment && !isBorrowing;
     }
-
-    // Return whether an ownership transfer was detected
-    return transferDetected;
+    // Recursively check children for deeper ownership transfers
+    return node.children && node.children.some(child => involvesOwnershipTransfer(child));
 }
-
-//function involvesOwnershipTransfer(node) {
-//    let transferDetected = false;
-//
-//    // Focus on let_declaration nodes since they're relevant to ownership transfer
-//    if (node.type === 'let_declaration' && node.children.length > 1) {
-//        // The RHS of the assignment (the value being assigned) is crucial
-//        const rhs = node.children[1]; // Assuming the RHS is always the second child for simplicity
-//
-//        // Check if the RHS is an identifier, which could indicate a potential ownership transfer
-//        // This assumes that the presence of an identifier (variable name) as RHS implies a transfer
-//        if (rhs.type === 'identifier') {
-//            // Confirm it's an assignment from one variable to another (not a literal or a function call)
-//            transferDetected = true;
-//        }
-//    }
-//
-//    return transferDetected;
-//}
 
 function generateHighlightedHTML(node, sourceCode) {
     // Define styles with data-analysis for detailed explanations
@@ -86,20 +38,6 @@ function generateHighlightedHTML(node, sourceCode) {
     function applyStyle(node, text, sourceCode) {
         let style = "";
     
-        // First, check for ownership transfer before mutable/immutable classification
-//        const transfer = involvesOwnershipTransfer(node, sourceCode);
-//        if (transfer) {
-//            console.log('Ownership transfer detected!')
-//            return `<span ${ownershipStyle}>${text}</span>`; // Directly return if ownership transfer is detected
-//        }
-//    
-//        // Then, check for mutable specifier presence for mutability.
-//        style = immutableBorrowStyle; // Default to immutable borrow style.
-//        console.log('Checking for mutability:', node.type, node.children)
-//        if (node.type === 'let_declaration' && node.children.some(child => child.type === 'mutable_specifier')) {
-//            console.log('Mutable specifier found!')
-//            style = mutableBorrowStyle; // If mutable specifier found, apply mutable borrow style.
-//        }
         console.log('Node Type:', node.type, 'Is Immutable Borrow:', isImmutableBorrow(node));
         console.log('Node Type:', node.type, 'Is Mutable Borrow:', isMutableBorrow(node));
         if (involvesOwnershipTransfer(node)) {
@@ -115,21 +53,21 @@ function generateHighlightedHTML(node, sourceCode) {
         return `<span ${style}>${text}</span>`;
     }
 
-    function isImmutableBorrow(node) {
-        // Directly check if the node is a reference_expression with a mutable_specifier
+    function isMutableBorrow(node) {
+        // Check for a mutable borrow by looking for a reference_expression that includes a mutable_specifier
         if (node.type === 'reference_expression') {
             return node.children.some(child => child.type === 'mutable_specifier');
         }
-        // Recurse through children to find a mutable borrow deeper in the tree
+        // Recursively check children
         return node.children && node.children.some(child => isMutableBorrow(child));
     }
-
-    function isMutableBorrow(node) {
-        // An immutable borrow would be a reference_expression without a mutable_specifier
+    
+    function isImmutableBorrow(node) {
+        // Check for an immutable borrow by looking for a reference_expression without a mutable_specifier
         if (node.type === 'reference_expression') {
-            return !node.children.some(child => child.type === 'mutable_specifier');
+            return node.children.every(child => child.type !== 'mutable_specifier');
         }
-        // Recurse through children to find an immutable borrow deeper in the tree
+        // Recursively check children
         return node.children && node.children.some(child => isImmutableBorrow(child));
     }
 
