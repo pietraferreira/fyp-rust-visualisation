@@ -120,3 +120,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 });
+
+document.getElementById('parseButton').addEventListener('click', async () => {
+    const code = document.getElementById('codeInput').value;
+    // Call Tree-sitter parsing as before
+
+    // Now, also send the code to your backend for AI analysis
+    fetch('http://localhost:3000/analyze-code', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ codeSnippet: code }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Assuming you have a place to show AI analysis results
+        document.getElementById('aiAnalysisOutput').innerText = data.analysis;
+    })
+    .catch(error => console.error('Error analyzing code with AI:', error));
+});

@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <title>Tree-sitter Rust Grammar - Ownership and Borrowing Visualizer</title>
     <style>
-        #codeOutput {
+        #codeOutput, #aiAnalysisOutput {
             white-space: pre-wrap;
             word-wrap: break-word;
             background-color: #f8f9fa;
@@ -14,6 +14,7 @@
             padding: 10px;
             font-family: monospace;
             min-height: 200px;
+            margin-top: 20px;
         }
         .legend {
             margin-top: 20px;
@@ -62,6 +63,13 @@
                     <h5>Detailed Analysis</h5>
                     <p id="analysisText">Hover over the highlighted sections in the code output for detailed analysis.</p>
                 </div>
+            </div>
+        </div>
+        <!-- AI Analysis -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <h5>AI Analysis</h5>
+                <div id="aiAnalysisOutput" class="border rounded p-3" style="background-color: #f8f9fa;"></div>
             </div>
         </div>
     </div>
