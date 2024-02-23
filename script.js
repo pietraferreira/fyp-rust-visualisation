@@ -10,7 +10,7 @@ async function initTreeSitter() {
   return parser;
 }
 
-function displayAiAnalysis(analysisData) {
+function displayAiAnalysis(analysisData, sourceCode) {
   console.log("Received analysisData for display:", analysisData);
   // get the HTML element where analysis results will be displayed
   const analysisOutput = document.getElementById("aiAnalysisOutput");
@@ -23,6 +23,9 @@ function displayAiAnalysis(analysisData) {
   try {
     const contentData = JSON.parse(contentString);
     console.log("Parsed contentData:", contentData);
+
+    // split the source code into lines
+    const sourceCodeLines = sourceCode.split("\n");
 
     // processes and displays the analysis data for a specific property (immutable_borrow, mutable_borrow, ownership_transfer)
     // with a given display text ("Immutable Borrow", "Mutable Borrow", "Ownership Transfer")
@@ -49,7 +52,7 @@ function displayAiAnalysis(analysisData) {
       // display data in the webpage
       if (lines.length > 0) {
         const borrowsText = lines
-          .map((line) => `Line ${line}: ${displayText}`)
+          .map((line) => `Line ${line}: ${sourceCodeLines[line - 1]}`)
           .join("<br>");
         analysisOutput.innerHTML += `<p><strong>${displayText}:</strong><br>${borrowsText}</p>`;
       } else {
@@ -231,7 +234,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        displayAiAnalysis(data.analysis); 
+        displayAiAnalysis(data.analysis, code); 
       })
       .catch((error) => console.error("Error analysing code with AI:", error));
   });
