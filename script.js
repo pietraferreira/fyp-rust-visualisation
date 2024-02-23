@@ -17,49 +17,46 @@ function displayAiAnalysis(analysisData) {
     const analysisOutput = document.getElementById('aiAnalysisOutput');
     analysisOutput.innerHTML = ''; // Clear previous content
 
-    // navigate to correct part of response
     const contentString = analysisData.choices[0].message.content;
-    console.log('contentString: ', contentString);
-    
+    console.log('contentString:', contentString);
+
     try {
-      const contentData = JSON.parse(contentString);
-      console.log('Parsed contentData:', contentData);
+        const contentData = JSON.parse(contentString);
+        console.log('Parsed contentData:', contentData);
 
-      let lineNumbers = [];
+        // Helper function to process and display borrow or transfer data
+        function processAndDisplayData(data, propertyName, displayText) {
+            let lines = [];
+            if (data[propertyName] !== undefined) {
+                lines = lines.concat(Array.isArray(data[propertyName]) ? data[propertyName] : [data[propertyName]]);
+            }
+            const alternativePropertyName = propertyName + 's'; // Handles plural forms
+            if (data[alternativePropertyName] !== undefined) {
+                lines = lines.concat(Array.isArray(data[alternativePropertyName]) ? data[alternativePropertyName] : [data[alternativePropertyName]]);
+            }
+            lines = [...new Set(lines)].sort((a, b) => a - b); // Remove duplicates and sort
 
-      // Check and collect "immutable_borrow"
-      if (contentData.immutable_borrow !== undefined) {
-          console.log("Found immutable_borrow:", contentData.immutable_borrow);
-          // Ensure it's an array and concatenate
-          lineNumbers = lineNumbers.concat(
-              Array.isArray(contentData.immutable_borrow) ? contentData.immutable_borrow : [contentData.immutable_borrow]
-          );
-      }
+            if (lines.length > 0) {
+                const borrowsText = lines.map(line => `Line ${line}: ${displayText}`).join('<br>');
+                analysisOutput.innerHTML += `<p><strong>${displayText}:</strong><br>${borrowsText}</p>`;
+            } else {
+                analysisOutput.innerHTML += `<p>No ${displayText.toLowerCase()} detected.</p>`;
+            }
+        }
 
-      // Check and collect "immutable_borrows"
-      if (contentData.immutable_borrows !== undefined) {
-          console.log("Found immutable_borrows:", contentData.immutable_borrows);
-          // Ensure it's an array and concatenate
-          lineNumbers = lineNumbers.concat(
-              Array.isArray(contentData.immutable_borrows) ? contentData.immutable_borrows : [contentData.immutable_borrows]
-          );
-      }
-
-      // remove duplicates, if any, and sort!
-      lineNumbers = [...new Set(lineNumbers)].sort((a, b) => a - b);
-
-      if (lineNumbers.length > 0) {
-        const immutableBorrowsText = lineNumbers.map(line => `Line ${line}: Immutable borrow`).join('<br>');
-        analysisOutput.innerHTML += `<p><strong>Immutable Borrows:</strong><br>${immutableBorrowsText}</p>`;
-      } else {
-        console.log('No immutable borrow detected');
-        analysisOutput.innerHTML += `<p>No immutable borrows detected.</p>`;
-      }
+        // Process and display immutable borrows
+        processAndDisplayData(contentData, "immutable_borrow", "Immutable Borrow");
+        
+        // Process and display mutable borrows
+        processAndDisplayData(contentData, "mutable_borrow", "Mutable Borrow");
+        
+        // Process and display ownership transfers
+        processAndDisplayData(contentData, "ownership_transfer", "Ownership Transfer");
 
     } catch (error) {
-      console.error('Error parsing analysis content:', error);
-      console.error('Original content string:', contentString);
-      analysisOutput.innerHTML += `<p>Error processing analysis data.</p>`;
+        console.error('Error parsing analysis content:', error);
+        console.error('Original content string:', contentString);
+        analysisOutput.innerHTML += `<p>Error processing analysis data.</p>`;
     }
 }
 
