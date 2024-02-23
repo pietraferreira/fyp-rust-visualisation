@@ -10,6 +10,22 @@ async function initTreeSitter() {
     return parser;
 }
 
+// Include your other functions here (isMutableBorrow, isImmutableBorrow, etc.)
+
+function displayAiAnalysis(data) {
+    const analysisOutput = document.getElementById('aiAnalysisOutput');
+    analysisOutput.innerHTML = ''; // Clear previous content
+    // Assuming data is already a JavaScript object (parsed JSON)
+    if (data.immutable_borrows && data.immutable_borrows.length > 0) {
+        const immutableBorrowsText = data.immutable_borrows.map(line => `Line ${line}: Immutable borrow`).join('<br>');
+        analysisOutput.innerHTML += `<p><strong>Immutable Borrows:</strong><br>${immutableBorrowsText}</p>`;
+    } else {
+        analysisOutput.innerHTML += `<p>No immutable borrows detected.</p>`;
+    }
+
+    // Add similar handling for mutable borrows and ownership transfers if needed
+}
+
 function involvesOwnershipTransfer(node) {
     // Check if the node is a let_declaration
     if (node.type === 'let_declaration') {
@@ -95,48 +111,38 @@ function generateHighlightedHTML(node, sourceCode) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const parser = await initTreeSitter();
-    console.log('DOM content loaded');
 
-    document.getElementById('parseButton').addEventListener('click', () => {
+    document.getElementById('parseButton').addEventListener('click', async () => {
         const code = document.getElementById('codeInput').value;
-        console.log('Code input:', code);
         const tree = parser.parse(code);
         document.getElementById('codeOutput').innerHTML = generateHighlightedHTML(tree.rootNode, code);
 
-        // Attach event listeners for newly created spans for hover analysis
+        // Handling mouseover and mouseout events for spans
         document.querySelectorAll('#codeOutput span').forEach(span => {
             span.addEventListener('mouseover', (event) => {
                 const analysisText = event.target.getAttribute('data-analysis');
-                console.log('Hovered span:', event.target);
-                console.log('Analysis text:', analysisText);
                 document.getElementById('detailedAnalysis').style.display = 'block';
                 document.getElementById('analysisText').textContent = analysisText;
             });
             span.addEventListener('mouseout', () => {
-                console.log('Mouse out');
                 document.getElementById('detailedAnalysis').style.display = 'none';
                 document.getElementById('analysisText').textContent = '';
             });
         });
+
+        // Send the code to your backend for AI analysis
+        fetch('http://localhost:3000/analyze-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ codeSnippet: code }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Display AI analysis results
+            displayAiAnalysis(data.analysis); // Ensure data.analysis is the correct path to your analysis data
+        })
+        .catch(error => console.error('Error analyzing code with AI:', error));
     });
-});
-
-document.getElementById('parseButton').addEventListener('click', async () => {
-    const code = document.getElementById('codeInput').value;
-    // Call Tree-sitter parsing as before
-
-    // Now, also send the code to your backend for AI analysis
-    fetch('http://localhost:3000/analyze-code', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ codeSnippet: code }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Assuming you have a place to show AI analysis results
-        document.getElementById('aiAnalysisOutput').innerText = data.analysis;
-    })
-    .catch(error => console.error('Error analyzing code with AI:', error));
 });
