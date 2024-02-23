@@ -8,9 +8,9 @@ async function analyseWithTreeSitter(code) {
 
   const tree = parser.parse(code);
   let analysisResults = {
-    immutableBorrow: [],
-    mutableBorrow: [],
-    ownershipTransfer: []
+    immutable_borrow: [],
+    mutable_borrow: [],
+    ownership_transfer: []
   };
 
   function traverse(node) {
