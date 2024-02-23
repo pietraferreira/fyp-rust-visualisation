@@ -1,181 +1,238 @@
+// initialise  TreeSitter and load the RustFYP language
 async function initTreeSitter() {
-    await TreeSitter.init();
-    console.log('TreeSitter initialized');
+  await TreeSitter.init(); // initialise system
+  console.log("TreeSitter initialized"); 
+  const parser = new TreeSitter(); // creates new TreeSitter parser instance
+  const RustFYP = await TreeSitter.Language.load("tree-sitter-rustfyp.wasm"); // load the custom parser
+  parser.setLanguage(RustFYP); // set it as the language
+  console.log("Language set:", RustFYP);
 
-    const parser = new TreeSitter();
-    const RustFYP = await TreeSitter.Language.load('tree-sitter-rustfyp.wasm');
-    parser.setLanguage(RustFYP);
-    console.log('Language set:', RustFYP);
-
-    return parser;
+  return parser;
 }
-
-// Include your other functions here (isMutableBorrow, isImmutableBorrow, etc.)
 
 function displayAiAnalysis(analysisData) {
-    console.log('Received analysisData for display:', analysisData);
-    const analysisOutput = document.getElementById('aiAnalysisOutput');
-    analysisOutput.innerHTML = ''; // Clear previous content
+  console.log("Received analysisData for display:", analysisData);
+  // get the HTML element where analysis results will be displayed
+  const analysisOutput = document.getElementById("aiAnalysisOutput");
+  // clear existing content
+  analysisOutput.innerHTML = "";
 
-    const contentString = analysisData.choices[0].message.content;
-    console.log('contentString:', contentString);
+  const contentString = analysisData.choices[0].message.content;
+  console.log("contentString:", contentString);
 
-    try {
-        const contentData = JSON.parse(contentString);
-        console.log('Parsed contentData:', contentData);
+  try {
+    const contentData = JSON.parse(contentString);
+    console.log("Parsed contentData:", contentData);
 
-        // Helper function to process and display borrow or transfer data
-        function processAndDisplayData(data, propertyName, displayText) {
-            let lines = [];
-            if (data[propertyName] !== undefined) {
-                lines = lines.concat(Array.isArray(data[propertyName]) ? data[propertyName] : [data[propertyName]]);
-            }
-            const alternativePropertyName = propertyName + 's'; // Handles plural forms
-            if (data[alternativePropertyName] !== undefined) {
-                lines = lines.concat(Array.isArray(data[alternativePropertyName]) ? data[alternativePropertyName] : [data[alternativePropertyName]]);
-            }
-            lines = [...new Set(lines)].sort((a, b) => a - b); // Remove duplicates and sort
+    // processes and displays the analysis data for a specific property (immutable_borrow, mutable_borrow, ownership_transfer)
+    // with a given display text ("Immutable Borrow", "Mutable Borrow", "Ownership Transfer")
+    function processAndDisplayData(data, propertyName, displayText) {
+      let lines = [];
+      // check and concatenate line numbers if the property exists (handles both singular and plural forms of the property name)
+      if (data[propertyName] !== undefined) {
+        lines = lines.concat(
+          Array.isArray(data[propertyName])
+            ? data[propertyName]
+            : [data[propertyName]]
+        );
+      }
+      const alternativePropertyName = propertyName + "s"; // handles plural forms
+      if (data[alternativePropertyName] !== undefined) {
+        lines = lines.concat(
+          Array.isArray(data[alternativePropertyName])
+            ? data[alternativePropertyName]
+            : [data[alternativePropertyName]]
+        );
+      }
+      lines = [...new Set(lines)].sort((a, b) => a - b); // remove duplicates and sort
 
-            if (lines.length > 0) {
-                const borrowsText = lines.map(line => `Line ${line}: ${displayText}`).join('<br>');
-                analysisOutput.innerHTML += `<p><strong>${displayText}:</strong><br>${borrowsText}</p>`;
-            } else {
-                analysisOutput.innerHTML += `<p>No ${displayText.toLowerCase()} detected.</p>`;
-            }
-        }
-
-        // Process and display immutable borrows
-        processAndDisplayData(contentData, "immutable_borrow", "Immutable Borrow");
-        
-        // Process and display mutable borrows
-        processAndDisplayData(contentData, "mutable_borrow", "Mutable Borrow");
-        
-        // Process and display ownership transfers
-        processAndDisplayData(contentData, "ownership_transfer", "Ownership Transfer");
-
-    } catch (error) {
-        console.error('Error parsing analysis content:', error);
-        console.error('Original content string:', contentString);
-        analysisOutput.innerHTML += `<p>Error processing analysis data.</p>`;
+      // display data in the webpage
+      if (lines.length > 0) {
+        const borrowsText = lines
+          .map((line) => `Line ${line}: ${displayText}`)
+          .join("<br>");
+        analysisOutput.innerHTML += `<p><strong>${displayText}:</strong><br>${borrowsText}</p>`;
+      } else {
+        analysisOutput.innerHTML += `<p>No ${displayText.toLowerCase()} detected.</p>`;
+      }
     }
+
+    // process and display the data for each property
+    processAndDisplayData(contentData, "immutable_borrow", "Immutable Borrow");
+    processAndDisplayData(contentData, "mutable_borrow", "Mutable Borrow");
+    processAndDisplayData(
+      contentData,
+      "ownership_transfer",
+      "Ownership Transfer"
+    );
+  } catch (error) {
+    console.error("Error parsing analysis content:", error); // errors during JSON parsing
+    console.error("Original content string:", contentString);
+    analysisOutput.innerHTML += `<p>Error processing analysis data.</p>`;
+  }
 }
 
+// check if a given node in the sytax tree involves ownership transfer
 function involvesOwnershipTransfer(node) {
-    // Check if the node is a let_declaration
-    if (node.type === 'let_declaration') {
-        // Check for direct assignment that's not a borrowing
-        const hasDirectAssignment = node.children.some(child => 
-            child.type === 'identifier' || child.type === 'call_expression'); // Simplified for clarity
+  if (node.type === "let_declaration") {
+    const hasDirectAssignment = node.children.some(
+      (child) => child.type === "identifier" || child.type === "call_expression"
+    );
 
-        const isBorrowing = node.children.some(child => 
-            child.type === 'reference_expression'); // Checks for any borrowing
+    const isBorrowing = node.children.some(
+      (child) => child.type === "reference_expression"
+    ); // checks for any borrowing
 
-        return hasDirectAssignment && !isBorrowing;
-    }
-    // Recursively check children for deeper ownership transfers
-    return node.children && node.children.some(child => involvesOwnershipTransfer(child));
+    return hasDirectAssignment && !isBorrowing;
+  }
+  return (
+    node.children &&
+    node.children.some((child) => involvesOwnershipTransfer(child))
+  );
 }
 
+// generate HTML content with highlights based on the syntax analysis
 function generateHighlightedHTML(node, sourceCode) {
-    // Define styles with data-analysis for detailed explanations
-    const styleTemplate = (color, analysis) => `style="background-color: ${color};" data-analysis="${analysis}"`;
+  // templates for different styles
+  const styleTemplate = (color, analysis) =>
+    `style="background-color: ${color};" data-analysis="${analysis}"`;
+  const ownershipStyle = styleTemplate(
+    "lightblue",
+    "Ownership is established or transferred."
+  );
+  const immutableBorrowStyle = styleTemplate(
+    "lightgreen",
+    "Immutable borrow, allowing read-only access."
+  ); 
+  const mutableBorrowStyle = styleTemplate(
+    "pink",
+    "Mutable borrow, allowing modification."
+  );
 
-    // Explanation templates
-    const ownershipStyle = styleTemplate("lightblue", "Ownership is established or transferred.");
-    const immutableBorrowStyle = styleTemplate("lightgreen", "Immutable borrow, allowing read-only access.");
-    const mutableBorrowStyle = styleTemplate("pink", "Mutable borrow, allowing modification.");
+  // apply the appropriate style to the given node 
+  function applyStyle(node, text, sourceCode) {
+    let style = "";
 
-    function applyStyle(node, text, sourceCode) {
-        let style = "";
-    
-        console.log('Node Type:', node.type, 'Is Immutable Borrow:', isImmutableBorrow(node));
-        console.log('Node Type:', node.type, 'Is Mutable Borrow:', isMutableBorrow(node));
-        if (involvesOwnershipTransfer(node)) {
-            style = ownershipStyle;
-        } else if (isMutableBorrow(node)) {
-            style = mutableBorrowStyle;
-        } else if (isImmutableBorrow(node)) {
-            style = immutableBorrowStyle;
-        } else {
-            return text;
-        }
-    
-        return `<span ${style}>${text}</span>`;
+    console.log(
+      "Node Type:",
+      node.type,
+      "Is Immutable Borrow:",
+      isImmutableBorrow(node)
+    );
+    console.log(
+      "Node Type:",
+      node.type,
+      "Is Mutable Borrow:",
+      isMutableBorrow(node)
+    );
+
+    // determine the type of syntax pattern and select
+    if (involvesOwnershipTransfer(node)) {
+      style = ownershipStyle;
+    } else if (isMutableBorrow(node)) {
+      style = mutableBorrowStyle;
+    } else if (isImmutableBorrow(node)) {
+      style = immutableBorrowStyle;
+    } else {
+      // if node doesn't match, return orignal text
+      return text;
     }
 
-    function isMutableBorrow(node) {
-        // Check for a mutable borrow by looking for a reference_expression that includes a mutable_specifier
-        if (node.type === 'reference_expression') {
-            return node.children.some(child => child.type === 'mutable_specifier');
-        }
-        // Recursively check children
-        return node.children && node.children.some(child => isMutableBorrow(child));
-    }
-    
-    function isImmutableBorrow(node) {
-        // Check for an immutable borrow by looking for a reference_expression without a mutable_specifier
-        if (node.type === 'reference_expression') {
-            return node.children.every(child => child.type !== 'mutable_specifier');
-        }
-        // Recursively check children
-        return node.children && node.children.some(child => isImmutableBorrow(child));
-    }
+    // return the highlighted text with the selected style
+    return `<span ${style}>${text}</span>`;
+  }
 
-    function highlightNode(node) {
-        let result = '';
-        //console.log(node.type, node.startIndex, node.endIndex)
-        if (['let_declaration', 'reference_expression', 'assignment_expression'].includes(node.type)) {
-            const text = sourceCode.substring(node.startIndex, node.endIndex);
-            console.log('we will check this:', text)
-            result += applyStyle(node, text, sourceCode);
-        } else {
-            let lastIndex = node.startIndex;
-            node.children.forEach((child) => {
-                result += sourceCode.substring(lastIndex, child.startIndex);
-                result += highlightNode(child);
-                lastIndex = child.endIndex;
-            });
-            result += sourceCode.substring(lastIndex, node.endIndex);
-        }
-        return result;
+  function isMutableBorrow(node) {
+    // check for a mutable borrow by looking for a reference_expression that includes a mutable_specifier
+    if (node.type === "reference_expression") {
+      return node.children.some((child) => child.type === "mutable_specifier");
     }
+    // recursively check children
+    return (
+      node.children && node.children.some((child) => isMutableBorrow(child))
+    );
+  }
 
-    return highlightNode(node);
+  function isImmutableBorrow(node) {
+    // check for an immutable borrow by looking for a reference_expression without a mutable_specifier
+    if (node.type === "reference_expression") {
+      return node.children.every((child) => child.type !== "mutable_specifier");
+    }
+    // recursively check children
+    return (
+      node.children && node.children.some((child) => isImmutableBorrow(child))
+    );
+  }
+
+  // recursively highlight the syntax tree
+  function highlightNode(node) {
+    let result = "";
+
+    if (
+      [
+        "let_declaration",
+        "reference_expression",
+        "assignment_expression",
+      ].includes(node.type)
+    ) {
+      const text = sourceCode.substring(node.startIndex, node.endIndex);
+      console.log("we will check this:", text);
+      result += applyStyle(node, text, sourceCode);
+    } else {
+      // for nodes that don't directly mtach, process all child nodes recursively
+      let lastIndex = node.startIndex;
+      node.children.forEach((child) => {
+        result += sourceCode.substring(lastIndex, child.startIndex);
+        result += highlightNode(child);
+        lastIndex = child.endIndex;
+      });
+      result += sourceCode.substring(lastIndex, node.endIndex);
+    }
+    return result;
+  }
+
+  // start the recursive process with the root
+  return highlightNode(node);
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const parser = await initTreeSitter();
+// sets up the webpage and handles the user input
+document.addEventListener("DOMContentLoaded", async () => {
+  const parser = await initTreeSitter(); // intialise the parser
 
-    document.getElementById('parseButton').addEventListener('click', async () => {
-        const code = document.getElementById('codeInput').value;
-        const tree = parser.parse(code);
-        document.getElementById('codeOutput').innerHTML = generateHighlightedHTML(tree.rootNode, code);
+  document.getElementById("parseButton").addEventListener("click", async () => {
+    const code = document.getElementById("codeInput").value; // get code from input area
+    const tree = parser.parse(code); // parse using TreeSitter RustFYP parser
+    // display highlighted code in the output area
+    document.getElementById("codeOutput").innerHTML = generateHighlightedHTML(
+      tree.rootNode,
+      code
+    );
 
-        // Handling mouseover and mouseout events for spans
-        document.querySelectorAll('#codeOutput span').forEach(span => {
-            span.addEventListener('mouseover', (event) => {
-                const analysisText = event.target.getAttribute('data-analysis');
-                document.getElementById('detailedAnalysis').style.display = 'block';
-                document.getElementById('analysisText').textContent = analysisText;
-            });
-            span.addEventListener('mouseout', () => {
-                document.getElementById('detailedAnalysis').style.display = 'none';
-                document.getElementById('analysisText').textContent = '';
-            });
-        });
-
-        // Send the code to your backend for AI analysis
-        fetch('http://localhost:3000/analyze-code', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ codeSnippet: code }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            displayAiAnalysis(data.analysis); // Ensure data.analysis is the correct path to your analysis data
-        })
-        .catch(error => console.error('Error analyzing code with AI:', error));
+    // handling mouseover and mouseout events for spans
+    document.querySelectorAll("#codeOutput span").forEach((span) => {
+      span.addEventListener("mouseover", (event) => {
+        const analysisText = event.target.getAttribute("data-analysis");
+        document.getElementById("detailedAnalysis").style.display = "block";
+        document.getElementById("analysisText").textContent = analysisText;
+      });
+      span.addEventListener("mouseout", () => {
+        document.getElementById("detailedAnalysis").style.display = "none";
+        document.getElementById("analysisText").textContent = "";
+      });
     });
+
+    // send the code to your backend for AI analysis
+    fetch("http://localhost:3000/analyse-code", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ codeSnippet: code }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        displayAiAnalysis(data.analysis); 
+      })
+      .catch((error) => console.error("Error analysing code with AI:", error));
+  });
 });
