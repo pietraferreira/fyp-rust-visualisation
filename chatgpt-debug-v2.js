@@ -32,7 +32,15 @@ app.post('/analyze-code', async (req, res) => {
       }]
     });
 
-    console.log(response.choices[0].message.content)
+    //console.log(response.choices[0].message.content)
+    
+    // simulate response
+    //const simulatedResponse = {
+    //  "immutable_borrow": [2]
+    //};
+
+    console.log(response);
+    res.json({ analysis: response });
 
   } catch (error) {
     console.error('Error caught:', error);

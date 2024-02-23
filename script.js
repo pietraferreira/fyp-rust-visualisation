@@ -12,16 +12,40 @@ async function initTreeSitter() {
 
 // Include your other functions here (isMutableBorrow, isImmutableBorrow, etc.)
 
-function displayAiAnalysis(data) {
+function displayAiAnalysis(analysisData) {
+    console.log('Received analysisData for display:', analysisData);
     const analysisOutput = document.getElementById('aiAnalysisOutput');
     analysisOutput.innerHTML = ''; // Clear previous content
-    // Assuming data is already a JavaScript object (parsed JSON)
-    if (data.immutable_borrows && data.immutable_borrows.length > 0) {
-        const immutableBorrowsText = data.immutable_borrows.map(line => `Line ${line}: Immutable borrow`).join('<br>');
+
+    // navigate to correct part of response
+    const contentString = analysisData.choices[0].message.content;
+    console.log('contentString: ', contentString);
+    
+    try {
+      const contentData = JSON.parse(contentString);
+
+      if (contentData.immutable_borrows !== undefined) {
+        console.log("is it undefined?", contentData.immutable_borrows);
+        console.log('immutable_borrow not undefined');
+        const lineNumbers = Array.isArray(contentData.immutable_borrows) ? contentData.immutable_borrows : [contentData.immutable_borrows];
+        const immutableBorrowsText = lineNumbers.map(line => `Line ${line}: Immutable borrow`).join('<br>');
         analysisOutput.innerHTML += `<p><strong>Immutable Borrows:</strong><br>${immutableBorrowsText}</p>`;
-    } else {
+      } else {
+        console.log('immutable_borrow undefined');
         analysisOutput.innerHTML += `<p>No immutable borrows detected.</p>`;
+      }
+    } catch (error) {
+      console.error('Error parsing analysis content:', error);
+      console.error('Original content string:', contentString);
+      analysisOutput.innerHTML += `<p>Error processing analysis data.</p>`;
     }
+
+    //if (analysisData.immutable_borrow && analysisData.immutable_borrow.length > 0) {
+    //    const immutableBorrowsText = analysisData.immutable_borrow.map(line => `Line ${line}: Immutable borrow`).join('<br>');
+    //    analysisOutput.innerHTML += `<p><strong>Immutable Borrows:</strong><br>${immutableBorrowsText}</p>`;
+    //} else {
+    //    analysisOutput.innerHTML += `<p>No immutable borrows detected.</p>`;
+    //}
 
     // Add similar handling for mutable borrows and ownership transfers if needed
 }
@@ -140,7 +164,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
         .then(response => response.json())
         .then(data => {
-            // Display AI analysis results
             displayAiAnalysis(data.analysis); // Ensure data.analysis is the correct path to your analysis data
         })
         .catch(error => console.error('Error analyzing code with AI:', error));
