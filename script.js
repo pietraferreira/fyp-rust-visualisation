@@ -23,31 +23,44 @@ function displayAiAnalysis(analysisData) {
     
     try {
       const contentData = JSON.parse(contentString);
+      console.log('Parsed contentData:', contentData);
 
+      let lineNumbers = [];
+
+      // Check and collect "immutable_borrow"
+      if (contentData.immutable_borrow !== undefined) {
+          console.log("Found immutable_borrow:", contentData.immutable_borrow);
+          // Ensure it's an array and concatenate
+          lineNumbers = lineNumbers.concat(
+              Array.isArray(contentData.immutable_borrow) ? contentData.immutable_borrow : [contentData.immutable_borrow]
+          );
+      }
+
+      // Check and collect "immutable_borrows"
       if (contentData.immutable_borrows !== undefined) {
-        console.log("is it undefined?", contentData.immutable_borrows);
-        console.log('immutable_borrow not undefined');
-        const lineNumbers = Array.isArray(contentData.immutable_borrows) ? contentData.immutable_borrows : [contentData.immutable_borrows];
+          console.log("Found immutable_borrows:", contentData.immutable_borrows);
+          // Ensure it's an array and concatenate
+          lineNumbers = lineNumbers.concat(
+              Array.isArray(contentData.immutable_borrows) ? contentData.immutable_borrows : [contentData.immutable_borrows]
+          );
+      }
+
+      // remove duplicates, if any, and sort!
+      lineNumbers = [...new Set(lineNumbers)].sort((a, b) => a - b);
+
+      if (lineNumbers.length > 0) {
         const immutableBorrowsText = lineNumbers.map(line => `Line ${line}: Immutable borrow`).join('<br>');
         analysisOutput.innerHTML += `<p><strong>Immutable Borrows:</strong><br>${immutableBorrowsText}</p>`;
       } else {
-        console.log('immutable_borrow undefined');
+        console.log('No immutable borrow detected');
         analysisOutput.innerHTML += `<p>No immutable borrows detected.</p>`;
       }
+
     } catch (error) {
       console.error('Error parsing analysis content:', error);
       console.error('Original content string:', contentString);
       analysisOutput.innerHTML += `<p>Error processing analysis data.</p>`;
     }
-
-    //if (analysisData.immutable_borrow && analysisData.immutable_borrow.length > 0) {
-    //    const immutableBorrowsText = analysisData.immutable_borrow.map(line => `Line ${line}: Immutable borrow`).join('<br>');
-    //    analysisOutput.innerHTML += `<p><strong>Immutable Borrows:</strong><br>${immutableBorrowsText}</p>`;
-    //} else {
-    //    analysisOutput.innerHTML += `<p>No immutable borrows detected.</p>`;
-    //}
-
-    // Add similar handling for mutable borrows and ownership transfers if needed
 }
 
 function involvesOwnershipTransfer(node) {
