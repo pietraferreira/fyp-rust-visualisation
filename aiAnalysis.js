@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { OpenAI } = require("openai");
 
 const openai = new OpenAI({
@@ -22,10 +23,38 @@ async function analyseWithAI(codeSnippet) {
       ],
     });
 
-    const analysisContent = response.choices[0].message.content;
-    const analysisResults = typeof analysisContent === 'string' ? JSON.parse(analysisContent) : analysisContent;
+    let analysisContent = response.choices[0].message.content;
+    let analysisResults = JSON.parse(analysisContent);
 
-    return analysisResults;
+    // Normalize results to ensure format consistency
+    let normalizedResults = {
+      immutable_borrow: [],
+      mutable_borrow: [],
+      ownership_transfer: []
+    };
+
+    // Function to normalize and ensure all keys are in expected format
+    const normalizeKey = (key, results) => {
+      if (results[key]) { // If singular form exists
+        normalizedResults[key] = Array.isArray(results[key]) ? results[key] : [results[key]];
+      }
+      let pluralKey = key + 's';
+      if (results[pluralKey]) { // If plural form exists
+        normalizedResults[key] = normalizedResults[key].concat(
+          Array.isArray(results[pluralKey]) ? results[pluralKey] : [results[pluralKey]]
+        );
+      }
+      // Ensure unique values and sort them
+      normalizedResults[key] = [...new Set(normalizedResults[key])].sort((a, b) => a - b);
+    };
+
+    // Normalize keys
+    normalizeKey('immutable_borrow', analysisResults);
+    normalizeKey('mutable_borrow', analysisResults);
+    normalizeKey('ownership_transfer', analysisResults);
+
+    //console.log(normalizedResults); // For debugging
+    return normalizedResults;
   } catch (error) {
     console.error("Error caught in AI analysis:", error);
     throw new Error("Failed to analyse code with AI");
