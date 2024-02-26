@@ -16,7 +16,7 @@ async function analyseWithTreeSitter(code) {
   function traverse(node) {
     for (const child of node.children) {
       // Adjust lineNum to correctly align with the one-based line numbers
-      const lineNum = child.startPosition.row + 1; // Convert to one-based line number
+      const lineNum = child.startPosition.row; // Convert to one-based line number
       const lines = code.split('\n');
       const lineContent = lines[lineNum - 1] ? lines[lineNum - 1].trim() : '';
 
