@@ -64,21 +64,130 @@ async function runComparisonTest(codeSnippet, expectedResults) {
 async function runAllTests() {
   const testCases = [
     {
-      description: "Test Case 1",
+      description: "Variable declaration without initialization",
       code: `fn main() {
-         let x = 5;
-         let y = &x;
-         println!("{}", y);
-        }`,
+         let x;
+      }`,
       expected: {
-        immutable_borrow: [2],
+        immutable_borrow: [],
         mutable_borrow: [],
         ownership_transfer: []
       }
     },
-    // more test cases here
+    {
+      description: "Variable declaration with immutable borrow",
+      code: `fn main() {
+         let x = 5;
+         let y = &x;
+      }`,
+      expected: {
+        immutable_borrow: [3],
+        mutable_borrow: [],
+        ownership_transfer: []
+      }
+    },
+    {
+      description: "Variable declaration with mutable borrow",
+      code: `fn main() {
+         let mut x = 5;
+         let y = &mut x;
+      }`,
+      expected: {
+        immutable_borrow: [],
+        mutable_borrow: [3],
+        ownership_transfer: []
+      }
+    },
+    {
+      description: "Basic arithmetic operation",
+      code: `fn main() {
+         let x = 5 + 2;
+      }`,
+      expected: {
+        immutable_borrow: [],
+        mutable_borrow: [],
+        ownership_transfer: []
+      }
+    },
+    {
+      description: "Function definition without parameters",
+      code: `fn test() {
+         let x = 10;
+      }`,
+      expected: {
+        immutable_borrow: [],
+        mutable_borrow: [],
+        ownership_transfer: []
+      }
+    },
+    {
+      description: "Function call with immutable borrow",
+      code: `fn main() {
+         let x = 5;
+         print_value(&x);
+      }
+  
+      fn print_value(val: &i32) {}`,
+      expected: {
+        immutable_borrow: [3],
+        mutable_borrow: [],
+        ownership_transfer: []
+      }
+    },
+    {
+      description: "Mutable variable reassignment",
+      code: `fn main() {
+         let mut x = 5;
+         x = 10;
+      }`,
+      expected: {
+        immutable_borrow: [],
+        mutable_borrow: [],
+        ownership_transfer: []
+      }
+    },
+    {
+      description: "Ownership transfer in function call",
+      code: `fn main() {
+         let x = 5;
+         take_ownership(x);
+      }
+  
+      fn take_ownership(val: i32) {}`,
+      expected: {
+        immutable_borrow: [],
+        mutable_borrow: [],
+        ownership_transfer: [3]
+      }
+    },
+    {
+      description: "Block scope with variable shadowing",
+      code: `fn main() {
+         let x = 5;
+         {
+             let x = x + 1;
+             println!("{}", x);
+         }
+      }`,
+      expected: {
+        immutable_borrow: [],
+        mutable_borrow: [],
+        ownership_transfer: []
+      }
+    },
+    {
+      description: "Method call on primitive type",
+      code: `fn main() {
+         let x = 5.to_string();
+      }`,
+      expected: {
+        immutable_borrow: [],
+        mutable_borrow: [],
+        ownership_transfer: []
+      }
+    },
   ];
-
+  
   for (const testCase of testCases) {
     console.log(`\nRunning Test: ${testCase.description}`);
     await runComparisonTest(testCase.code, testCase.expected);
