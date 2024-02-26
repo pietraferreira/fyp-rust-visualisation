@@ -5,6 +5,6 @@ mkdir -p logs
 timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 logFile="logs/log_$timestamp.txt"
 
-node unified-testing-ai-treesitterv4-wip.js | tee "$logFile" 
+node unified-testing-ai-treesitter.js | tee "$logFile" 
 
 echo "Tests completed. Output logged to $logFile"
