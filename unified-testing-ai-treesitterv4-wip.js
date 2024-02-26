@@ -59,9 +59,20 @@ async function runComparisonTest(codeSnippet, expectedResults) {
   } else {
     console.log("Both performed equally.");
   }
+
+  return {
+    aiPerformedBetter: aiScore > treeSitterScore,
+    treeSitterPerformedBetter: treeSitterScore > aiScore,
+    equalPerformance: treeSitterScore === aiScore
+  };
 }
 
 async function runAllTests() {
+  // counters
+  let aiCorrectCount = 0;
+  let treeSitterCorrectCount = 0;
+  let totalTests = 0;
+
   const testCases = [
     {
       description: "Variable declaration without initialization",
@@ -190,8 +201,22 @@ async function runAllTests() {
   
   for (const testCase of testCases) {
     console.log(`\nRunning Test: ${testCase.description}`);
-    await runComparisonTest(testCase.code, testCase.expected);
+    //await runComparisonTest(testCase.code, testCase.expected);
+    const result = await runComparisonTest(testCase.code, testCase.expected);
+    if (result.aiPerformedBetter) aiCorrectCount++;
+    if (result.treeSitterPerformedBetter) treeSitterCorrectCount++;
+    if (result.equalPerformance) {
+      aiCorrectCount++;
+      treeSitterCorrectCount++;
+    }
+    totalTests++;
   }
+
+  console.log("\nOverall Performance Results:");
+  console.log(`| System        | Correct Tests | Percentage   |`);
+  console.log(`|---------------|---------------|--------------|`);
+  console.log(`| AI            | ${aiCorrectCount}            | ${(aiCorrectCount / totalTests * 100).toFixed(2)}%        |`);
+  console.log(`| Tree-Sitter   | ${treeSitterCorrectCount}            | ${(treeSitterCorrectCount / totalTests * 100).toFixed(2)}%        |`);
 }
 
 runAllTests();
