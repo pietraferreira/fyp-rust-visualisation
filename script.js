@@ -225,17 +225,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // send the code to your backend for AI analysis
-    fetch("http://localhost:3000/analyse-code", {
+    // send the code to your backend for AI analysis
+    fetch("https://fyp-rust-visualisation.onrender.com/analyse-code", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ codeSnippet: code }),
     })
-      .then((response) => response.json())
-      .then((data) => {
-        displayAiAnalysis(data.analysis, code); 
-      })
-      .catch((error) => console.error("Error analysing code with AI:", error));
-  });
+    .then((response) => response.json())
+    .then((data) => {
+      displayAiAnalysis(data.analysis, code); 
+    })
+    .catch((error) => console.error("Error analysing code with AI:", error));
+    });
 });
