@@ -9,7 +9,9 @@ const app = express();
 const port = 3000;
 
 // apply middleware to express app
-app.use(cors()); // enable CORS, so that the frontend can make requests to the backend
+app.use(cors({
+  origin: ['https://pietraferreira.github.io', 'https://fyp-rust-visualisation.onrender.com']
+})); // enable CORS, so that the frontend can make requests to the backend
 app.use(bodyParser.json()); // automatically parse JSON in request body
 
 // import the openAI SDK and configure it
